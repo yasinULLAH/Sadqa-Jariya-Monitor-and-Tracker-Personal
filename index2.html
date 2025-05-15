@@ -1,0 +1,1832 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jariyah Projects Monitor</title>
+    <!-- Author: Yasin Ullah, Pakistani -->
+    <style>
+        :root {
+            --primary-color: #00a79d; /* Teal */
+            --secondary-color: #f7941d; /* Orange */
+            --accent-color: #27ae60; /* Green */
+            --background-color: #f4f7f6;
+            --text-color: #333;
+            --card-background: rgba(255, 255, 255, 0.9);
+            --modal-background: rgba(240, 240, 240, 0.95);
+            --border-color: #ddd;
+            --shadow-color: rgba(0, 0, 0, 0.1);
+            --futuristic-glow: 0 0 5px var(--primary-color), 0 0 10px var(--primary-color), 0 0 15px var(--accent-color);
+            --font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        [data-theme="dark"] {
+            --primary-color: #00c2b3; 
+            --secondary-color: #ffa500;
+            --accent-color: #2ecc71;
+            --background-color: #1a1a2e;
+            --text-color: #e0e0e0;
+            --card-background: rgba(40, 40, 60, 0.85);
+            --modal-background: rgba(30, 30, 50, 0.95);
+            --border-color: #444;
+            --shadow-color: rgba(0, 0, 0, 0.3);
+            --futuristic-glow: 0 0 8px var(--primary-color), 0 0 15px var(--primary-color), 0 0 20px var(--accent-color);
+        }
+
+
+        body {
+            font-family: var(--font-family);
+            margin: 0;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            transition: background-color 0.3s, color 0.3s;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        .app-container {
+            display: flex;
+            flex-grow: 1;
+        }
+
+        header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 1rem;
+            text-align: center;
+            box-shadow: 0 2px 4px var(--shadow-color);
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 1.8rem;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+        }
+
+        nav {
+            background-color: var(--card-background);
+            backdrop-filter: blur(5px);
+            padding: 1rem;
+            width: 220px;
+            box-shadow: 2px 0 5px var(--shadow-color);
+            display: flex;
+            flex-direction: column;
+        }
+
+        nav ul {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        nav ul li a {
+            display: block;
+            padding: 0.75rem 1rem;
+            text-decoration: none;
+            color: var(--text-color);
+            border-radius: 4px;
+            margin-bottom: 0.5rem;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        nav ul li a:hover, nav ul li a.active {
+            background-color: var(--primary-color);
+            color: white;
+            box-shadow: var(--futuristic-glow);
+        }
+        
+        .theme-switcher {
+            margin-top: auto;
+            padding: 1rem;
+            text-align: center;
+        }
+
+        .theme-switcher button {
+            background-color: var(--secondary-color);
+            color: white;
+        }
+
+
+        main {
+            flex-grow: 1;
+            padding: 1.5rem;
+            overflow-y: auto;
+        }
+
+        .page {
+            display: none;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .card {
+            background-color: var(--card-background);
+            backdrop-filter: blur(5px);
+            border-radius: 8px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 8px var(--shadow-color);
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 12px var(--shadow-color);
+        }
+
+        .card h3 {
+            margin-top: 0;
+            color: var(--primary-color);
+        }
+        .card h4 {
+            color: var(--secondary-color);
+        }
+
+        button, input[type="submit"] {
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.25rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: background-color 0.3s, box-shadow 0.3s;
+        }
+
+        button:hover, input[type="submit"]:hover {
+            background-color: #218c50; /* Darker green */
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+        
+        button.secondary {
+            background-color: var(--secondary-color);
+        }
+        button.secondary:hover {
+            background-color: #d87a0a; /* Darker orange */
+        }
+        button.danger {
+            background-color: #e74c3c;
+        }
+        button.danger:hover {
+            background-color: #c0392b;
+        }
+
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.5);
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background-color: var(--modal-background);
+            backdrop-filter: blur(10px);
+            margin: auto;
+            padding: 25px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            width: 80%;
+            max-width: 600px;
+            box-shadow: 0 5px 15px var(--shadow-color);
+            position: relative;
+        }
+
+        .close-button {
+            color: var(--text-color);
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .close-button:hover, .close-button:focus {
+            color: #e74c3c;
+        }
+
+        form label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: bold;
+            color: var(--text-color);
+        }
+
+        form input[type="text"],
+        form input[type="number"],
+        form input[type="date"],
+        form input[type="email"],
+        form input[type="tel"],
+        form textarea,
+        form select {
+            width: calc(100% - 20px);
+            padding: 0.75rem;
+            margin-bottom: 1rem;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            box-sizing: border-box;
+        }
+        form textarea {
+            min-height: 100px;
+        }
+
+        .progress-bar-container {
+            width: 100%;
+            background-color: var(--border-color);
+            border-radius: 4px;
+            margin-bottom: 0.5rem;
+        }
+
+        .progress-bar {
+            height: 20px;
+            background-color: var(--accent-color);
+            border-radius: 4px;
+            text-align: center;
+            line-height: 20px;
+            color: white;
+            font-size: 0.8rem;
+            transition: width 0.5s ease-in-out;
+        }
+
+        .photo-log img {
+            max-width: 150px;
+            max-height: 150px;
+            margin: 5px;
+            border-radius: 4px;
+            border: 1px solid var(--border-color);
+            cursor: pointer;
+        }
+        
+        .photo-preview {
+            max-width: 100%;
+            max-height: 200px;
+            margin-top: 10px;
+            border-radius: 4px;
+        }
+
+        .list-item {
+            border-bottom: 1px solid var(--border-color);
+            padding: 0.75rem 0;
+        }
+        .list-item:last-child {
+            border-bottom: none;
+        }
+
+        .financial-summary strong {
+            color: var(--primary-color);
+        }
+
+        .milestone-status-pending { color: #f39c12; }
+        .milestone-status-in_progress { color: #3498db; }
+        .milestone-status-completed { color: var(--accent-color); }
+
+        .tabs {
+            display: flex;
+            margin-bottom: 1rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .tab-button {
+            padding: 0.75rem 1.25rem;
+            cursor: pointer;
+            border: none;
+            background-color: transparent;
+            color: var(--text-color);
+            font-size: 1rem;
+            border-bottom: 3px solid transparent;
+        }
+        .tab-button.active {
+            border-bottom-color: var(--primary-color);
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        
+        #projectDetailView h2 {
+            color: var(--primary-color);
+            border-bottom: 2px solid var(--secondary-color);
+            padding-bottom: 0.5rem;
+        }
+
+        .actions button {
+            margin-right: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        footer {
+            text-align: center;
+            padding: 1rem;
+            background-color: var(--card-background);
+            color: var(--text-color);
+            font-size: 0.9rem;
+            border-top: 1px solid var(--border-color);
+        }
+        
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .app-container {
+                flex-direction: column;
+            }
+            nav {
+                width: 100%;
+                padding: 0.5rem;
+                flex-direction: row; /* Or keep column and make it collapsible */
+                overflow-x: auto; /* For horizontal scrolling if many items */
+            }
+            nav ul {
+                display: flex; /* For horizontal nav items */
+                flex-wrap: wrap; /* Allow wrapping */
+            }
+            nav ul li a {
+                margin-right: 0.5rem;
+                padding: 0.5rem 0.75rem;
+            }
+            .dashboard-grid {
+                grid-template-columns: 1fr; /* Stack cards */
+            }
+            .modal-content {
+                width: 90%;
+            }
+            .theme-switcher {
+                display: none; /* Could be moved to a settings page or menu */
+            }
+        }
+
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Jariyah Projects Monitor</h1>
+    </header>
+
+    <div class="app-container">
+        <nav>
+            <ul>
+                <li><a href="#dashboard" class="nav-link active">📊 Dashboard</a></li>
+                <li><a href="#projects" class="nav-link">🏗️ Projects</a></li>
+                <li><a href="#contacts" class="nav-link">👥 Contacts</a></li>
+                <li><a href="#settings" class="nav-link">⚙️ Settings</a></li>
+            </ul>
+            <div class="theme-switcher">
+                <button id="themeToggleBtn">Toggle Theme</button>
+            </div>
+        </nav>
+
+        <main>
+            <!-- Dashboard Page -->
+            <div id="dashboard" class="page active">
+                <h2>🌟 Community Impact Dashboard</h2>
+                <div class="dashboard-grid" id="dashboardGrid">
+                    <!-- Summary cards will be injected here -->
+                </div>
+                <h3>Recent Activity</h3>
+                <div id="recentActivity" class="card">
+                    <p>No recent activity yet.</p>
+                </div>
+            </div>
+
+            <!-- Projects Page -->
+            <div id="projects" class="page">
+                <div id="projectsListView">
+                    <h2>Projects List <button id="addProjectBtn" style="float: right;">+ New Project</button></h2>
+                    <div id="projectsListContainer" class="dashboard-grid">
+                        <!-- Project cards will be injected here -->
+                    </div>
+                </div>
+                <div id="projectDetailView" style="display:none;">
+                    <button id="backToProjectsBtn">← Back to Projects</button>
+                    <h2 id="projectDetailName"></h2>
+                    <div class="card financial-summary" id="projectFinancialSummary"></div>
+                    
+                    <div class="tabs">
+                        <button class="tab-button active" data-tab="donations">💰 Donations/Pledges</button>
+                        <button class="tab-button" data-tab="expenses">💸 Expenses</button>
+                        <button class="tab-button" data-tab="milestones">🚩 Milestones</button>
+                        <button class="tab-button" data-tab="photos">📸 Photos</button>
+                        <button class="tab-button" data-tab="projectNotes">📝 Notes</button>
+                    </div>
+
+                    <div id="donationsTab" class="tab-content active">
+                        <h3>Donations & Pledges <button id="addDonationBtn" class="small-btn">+ Add</button></h3>
+                        <div id="donationsList"></div>
+                    </div>
+                    <div id="expensesTab" class="tab-content">
+                        <h3>Expenses <button id="addExpenseBtn" class="small-btn">+ Add</button></h3>
+                        <div id="expensesList"></div>
+                    </div>
+                    <div id="milestonesTab" class="tab-content">
+                        <h3>Progress Milestones <button id="addMilestoneBtn" class="small-btn">+ Add</button></h3>
+                        <div id="milestonesList"></div>
+                    </div>
+                    <div id="photosTab" class="tab-content">
+                        <h3>Photo Log <button id="addPhotoBtn" class="small-btn">+ Add</button></h3>
+                        <div id="photosLog" class="photo-log"></div>
+                    </div>
+                    <div id="projectNotesTab" class="tab-content">
+                        <h3>Project Notes <button id="addProjectNoteBtn" class="small-btn">+ Add</button></h3>
+                        <div id="projectNotesList"></div>
+                    </div>
+                     <button id="exportProjectSummaryBtn" class="secondary" style="margin-top: 20px;">Export Project Summary</button>
+                </div>
+            </div>
+
+            <!-- Contacts Page -->
+            <div id="contacts" class="page">
+                <h2>Contacts <button id="addContactBtn" style="float: right;">+ New Contact</button></h2>
+                <div id="contactsListContainer" class="dashboard-grid">
+                    <!-- Contact cards will be injected here -->
+                </div>
+            </div>
+
+            <!-- Settings Page -->
+            <div id="settings" class="page">
+                <h2>Settings</h2>
+                <div class="card">
+                    <h3>Data Management</h3>
+                    <button id="backupDataBtn">Backup All Data (JSON)</button>
+                    <label for="restoreFile" style="display:block; margin-top:1rem;">Restore Data (JSON):</label>
+                    <input type="file" id="restoreFile" accept=".json">
+                    <button id="restoreDataBtn" style="margin-top:0.5rem;">Restore</button>
+                    <p><small><strong>Warning:</strong> Restoring data will overwrite existing data.</small></p>
+                </div>
+                <div class="card">
+                    <h3>Theme</h3>
+                    <p>Current theme: <span id="currentThemeLabel">Light</span></p>
+                    <button id="settingsThemeToggleBtn">Switch to Dark/Light Theme</button>
+                </div>
+                 <div class="card">
+                    <h3>About</h3>
+                    <p><strong>Jariyah Projects Monitor</strong></p>
+                    <p>Version 1.0.0</p>
+                    <p>Author: Yasin Ullah, Pakistani</p>
+                    <p>An offline tool to help coordinate local Sadaqah Jariyah projects.</p>
+                </div>
+            </div>
+        </main>
+    </div>
+    
+    <footer>
+        <p>© <span id="currentYear"></span> Jariyah Projects Monitor. Created with ❤️ for community development.</p>
+    </footer>
+
+    <!-- Modals -->
+    <div id="projectModal" class="modal">
+        <div class="modal-content">
+            <span class="close-button" onclick="closeModal('projectModal')">×</span>
+            <h3 id="projectModalTitle">Add New Project</h3>
+            <form id="projectForm">
+                <input type="hidden" id="projectId">
+                <label for="projectName">Project Name:</label>
+                <input type="text" id="projectName" required>
+                <label for="projectGoal">Goal:</label>
+                <textarea id="projectGoal" required></textarea>
+                <label for="projectTargetAmount">Target Amount (PKR):</label>
+                <input type="number" id="projectTargetAmount" min="0" step="0.01" required>
+                <label for="projectDescription">Description:</label>
+                <textarea id="projectDescription"></textarea>
+                <button type="submit">Save Project</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="donationModal" class="modal">
+        <div class="modal-content">
+            <span class="close-button" onclick="closeModal('donationModal')">×</span>
+            <h3 id="donationModalTitle">Add Donation/Pledge</h3>
+            <form id="donationForm">
+                <input type="hidden" id="donationProjectId">
+                <input type="hidden" id="donationId">
+                <label for="donorName">Donor Name:</label>
+                <input type="text" id="donorName" required>
+                <label for="donationAmount">Amount (PKR):</label>
+                <input type="number" id="donationAmount" min="0" step="0.01" required>
+                <label for="donationDate">Date:</label>
+                <input type="date" id="donationDate" required>
+                <label for="donationType">Type:</label>
+                <select id="donationType">
+                    <option value="donation">Donation</option>
+                    <option value="pledge">Pledge</option>
+                </select>
+                <button type="submit">Save Donation</button>
+            </form>
+        </div>
+    </div>
+    
+    <div id="expenseModal" class="modal">
+        <div class="modal-content">
+            <span class="close-button" onclick="closeModal('expenseModal')">×</span>
+            <h3 id="expenseModalTitle">Add Expense</h3>
+            <form id="expenseForm">
+                <input type="hidden" id="expenseProjectId">
+                <input type="hidden" id="expenseId">
+                <label for="expenseDescription">Description:</label>
+                <input type="text" id="expenseDescription" required>
+                <label for="expenseAmount">Amount (PKR):</label>
+                <input type="number" id="expenseAmount" min="0" step="0.01" required>
+                <label for="expenseDate">Date:</label>
+                <input type="date" id="expenseDate" required>
+                <button type="submit">Save Expense</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="milestoneModal" class="modal">
+        <div class="modal-content">
+            <span class="close-button" onclick="closeModal('milestoneModal')">×</span>
+            <h3 id="milestoneModalTitle">Add Milestone</h3>
+            <form id="milestoneForm">
+                <input type="hidden" id="milestoneProjectId">
+                <input type="hidden" id="milestoneId">
+                <label for="milestoneDescription">Description:</label>
+                <input type="text" id="milestoneDescription" required>
+                <label for="milestoneDate">Date:</label>
+                <input type="date" id="milestoneDate" required>
+                <label for="milestoneStatus">Status:</label>
+                <select id="milestoneStatus">
+                    <option value="pending">Pending</option>
+                    <option value="in_progress">In Progress</option>
+                    <option value="completed">Completed</option>
+                </select>
+                <button type="submit">Save Milestone</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="photoModal" class="modal">
+        <div class="modal-content">
+            <span class="close-button" onclick="closeModal('photoModal')">×</span>
+            <h3 id="photoModalTitle">Add Photo</h3>
+            <form id="photoForm">
+                <input type="hidden" id="photoProjectId">
+                <label for="photoFile">Photo:</label>
+                <input type="file" id="photoFile" accept="image/*" required>
+                <img id="photoPreview" src="#" alt="Photo Preview" style="display:none;">
+                <label for="photoCaption">Caption:</label>
+                <input type="text" id="photoCaption">
+                <label for="photoDate">Date:</label>
+                <input type="date" id="photoDate" required>
+                <button type="submit">Save Photo</button>
+            </form>
+        </div>
+    </div>
+    
+    <div id="projectNoteModal" class="modal">
+        <div class="modal-content">
+            <span class="close-button" onclick="closeModal('projectNoteModal')">×</span>
+            <h3 id="projectNoteModalTitle">Add Project Note</h3>
+            <form id="projectNoteForm">
+                <input type="hidden" id="projectNoteProjectId">
+                <input type="hidden" id="projectNoteId">
+                <label for="projectNoteText">Note:</label>
+                <textarea id="projectNoteText" required></textarea>
+                <label for="projectNoteDate">Date:</label>
+                <input type="date" id="projectNoteDate" required>
+                <button type="submit">Save Note</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="contactModal" class="modal">
+        <div class="modal-content">
+            <span class="close-button" onclick="closeModal('contactModal')">×</span>
+            <h3 id="contactModalTitle">Add New Contact</h3>
+            <form id="contactForm">
+                <input type="hidden" id="contactId">
+                <label for="contactName">Name:</label>
+                <input type="text" id="contactName" required>
+                <label for="contactRole">Role/Relation:</label>
+                <input type="text" id="contactRole">
+                <label for="contactInfo">Contact Info (Phone/Email):</label>
+                <input type="text" id="contactInfo">
+                <label for="contactNotes">Notes:</label>
+                <textarea id="contactNotes"></textarea>
+                <button type="submit">Save Contact</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="imageDetailModal" class="modal" style="align-items: center; justify-content: center;">
+        <div class="modal-content" style="max-width: 90vw; max-height: 90vh; padding:10px;">
+            <span class="close-button" onclick="closeModal('imageDetailModal')" style="top: 15px; right: 25px; font-size: 35px;">×</span>
+            <img id="imageDetailModalSrc" src="" alt="Full Image" style="width: 100%; height: auto; max-height: 85vh; object-fit: contain;">
+            <p id="imageDetailModalCaption" style="text-align: center; margin-top: 10px;"></p>
+        </div>
+    </div>
+
+
+    <script>
+        // Author: Yasin Ullah, Pakistani
+        // --- App Configuration & State ---
+        const DB_NAME = 'JariyahProjectsDBw';
+        const DB_VERSION = 1;
+        let db;
+        let currentView = 'dashboard';
+        let currentProjectId = null;
+
+        const STORE_PROJECTS = 'projects';
+        const STORE_DONATIONS = 'donations';
+        const STORE_EXPENSES = 'expenses';
+        const STORE_MILESTONES = 'milestones';
+        const STORE_PHOTOS = 'photos';
+        const STORE_PROJECT_NOTES = 'projectNotes';
+        const STORE_CONTACTS = 'contacts';
+
+        // --- IndexedDB Setup ---
+        function openDB() {
+            return new Promise((resolve, reject) => {
+                const request = indexedDB.open(DB_NAME, DB_VERSION);
+
+                request.onupgradeneeded = event => {
+                    db = event.target.result;
+                    if (!db.objectStoreNames.contains(STORE_PROJECTS)) {
+                        db.createObjectStore(STORE_PROJECTS, { keyPath: 'id', autoIncrement: true });
+                    }
+                    if (!db.objectStoreNames.contains(STORE_DONATIONS)) {
+                        const donationsStore = db.createObjectStore(STORE_DONATIONS, { keyPath: 'id', autoIncrement: true });
+                        donationsStore.createIndex('projectId', 'projectId', { unique: false });
+                    }
+                    if (!db.objectStoreNames.contains(STORE_EXPENSES)) {
+                        const expensesStore = db.createObjectStore(STORE_EXPENSES, { keyPath: 'id', autoIncrement: true });
+                        expensesStore.createIndex('projectId', 'projectId', { unique: false });
+                    }
+                    if (!db.objectStoreNames.contains(STORE_MILESTONES)) {
+                        const milestonesStore = db.createObjectStore(STORE_MILESTONES, { keyPath: 'id', autoIncrement: true });
+                        milestonesStore.createIndex('projectId', 'projectId', { unique: false });
+                    }
+                    if (!db.objectStoreNames.contains(STORE_PHOTOS)) {
+                        const photosStore = db.createObjectStore(STORE_PHOTOS, { keyPath: 'id', autoIncrement: true });
+                        photosStore.createIndex('projectId', 'projectId', { unique: false });
+                    }
+                    if (!db.objectStoreNames.contains(STORE_PROJECT_NOTES)) {
+                        const notesStore = db.createObjectStore(STORE_PROJECT_NOTES, { keyPath: 'id', autoIncrement: true });
+                        notesStore.createIndex('projectId', 'projectId', { unique: false });
+                    }
+                    if (!db.objectStoreNames.contains(STORE_CONTACTS)) {
+                        db.createObjectStore(STORE_CONTACTS, { keyPath: 'id', autoIncrement: true });
+                    }
+                };
+
+                request.onsuccess = event => {
+                    db = event.target.result;
+                    resolve(db);
+                };
+
+                request.onerror = event => {
+                    console.error('Database error:', event.target.errorCode);
+                    reject(event.target.errorCode);
+                };
+            });
+        }
+
+        // --- DB Helper Functions ---
+        function addToStore(storeName, data) {
+            return new Promise((resolve, reject) => {
+                if (!db) { reject("DB not initialized"); return; }
+                const transaction = db.transaction(storeName, 'readwrite');
+                const store = transaction.objectStore(storeName);
+                const request = store.add(data);
+                request.onsuccess = () => resolve(request.result);
+                request.onerror = (event) => reject(`Error adding to ${storeName}: ${event.target.error}`);
+            });
+        }
+
+        function updateInStore(storeName, data) {
+            return new Promise((resolve, reject) => {
+                if (!db) { reject("DB not initialized"); return; }
+                const transaction = db.transaction(storeName, 'readwrite');
+                const store = transaction.objectStore(storeName);
+                const request = store.put(data); // put handles both add and update
+                request.onsuccess = () => resolve(request.result);
+                request.onerror = (event) => reject(`Error updating in ${storeName}: ${event.target.error}`);
+            });
+        }
+        
+        function getFromStore(storeName, key) {
+            return new Promise((resolve, reject) => {
+                if (!db) { reject("DB not initialized"); return; }
+                const transaction = db.transaction(storeName, 'readonly');
+                const store = transaction.objectStore(storeName);
+                const request = store.get(key);
+                request.onsuccess = () => resolve(request.result);
+                request.onerror = (event) => reject(`Error getting from ${storeName}: ${event.target.error}`);
+            });
+        }
+
+        function getAllFromStore(storeName) {
+            return new Promise((resolve, reject) => {
+                if (!db) { reject("DB not initialized"); return; }
+                const transaction = db.transaction(storeName, 'readonly');
+                const store = transaction.objectStore(storeName);
+                const request = store.getAll();
+                request.onsuccess = () => resolve(request.result);
+                request.onerror = (event) => reject(`Error getting all from ${storeName}: ${event.target.error}`);
+            });
+        }
+
+        function deleteFromStore(storeName, key) {
+            return new Promise((resolve, reject) => {
+                if (!db) { reject("DB not initialized"); return; }
+                const transaction = db.transaction(storeName, 'readwrite');
+                const store = transaction.objectStore(storeName);
+                const request = store.delete(key);
+                request.onsuccess = () => resolve();
+                request.onerror = (event) => reject(`Error deleting from ${storeName}: ${event.target.error}`);
+            });
+        }
+
+        function getByIndex(storeName, indexName, value) {
+            return new Promise((resolve, reject) => {
+                if (!db) { reject("DB not initialized"); return; }
+                const transaction = db.transaction(storeName, 'readonly');
+                const store = transaction.objectStore(storeName);
+                const index = store.index(indexName);
+                const request = index.getAll(value);
+                request.onsuccess = () => resolve(request.result);
+                request.onerror = (event) => reject(`Error getting by index from ${storeName}: ${event.target.error}`);
+            });
+        }
+        
+        // --- Helper Functions ---
+        function formatDate(dateString) {
+            if (!dateString) return 'N/A';
+            const date = new Date(dateString);
+            return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+        }
+
+        function showModal(modalId) {
+            document.getElementById(modalId).style.display = 'flex';
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+            // Reset forms within modals
+            const form = document.getElementById(modalId).querySelector('form');
+            if (form) form.reset();
+            if (modalId === 'photoModal') {
+                 document.getElementById('photoPreview').style.display = 'none';
+                 document.getElementById('photoPreview').src = '#';
+            }
+        }
+
+        function navigateTo(pageId, projectId = null) {
+            document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
+            document.getElementById(pageId).classList.add('active');
+            
+            document.querySelectorAll('.nav-link').forEach(link => link.classList.remove('active'));
+            document.querySelector(`.nav-link[href="#${pageId}"]`).classList.add('active');
+
+            currentView = pageId;
+            currentProjectId = projectId;
+
+            if (pageId === 'projects' && projectId) {
+                document.getElementById('projectsListView').style.display = 'none';
+                document.getElementById('projectDetailView').style.display = 'block';
+                loadProjectDetail(projectId);
+            } else if (pageId === 'projects') {
+                document.getElementById('projectsListView').style.display = 'block';
+                document.getElementById('projectDetailView').style.display = 'none';
+                loadProjects();
+            } else if (pageId === 'dashboard') {
+                loadDashboard();
+            } else if (pageId === 'contacts') {
+                loadContacts();
+            }
+        }
+        
+        function switchTab(tabName) {
+            document.querySelectorAll('#projectDetailView .tab-content').forEach(tc => tc.classList.remove('active'));
+            document.getElementById(`${tabName}Tab`).classList.add('active');
+            document.querySelectorAll('#projectDetailView .tab-button').forEach(tb => tb.classList.remove('active'));
+            document.querySelector(`#projectDetailView .tab-button[data-tab="${tabName}"]`).classList.add('active');
+        }
+
+        // --- CRUD and Rendering Functions ---
+
+        // Projects
+        async function loadProjects() {
+            try {
+                const projects = await getAllFromStore(STORE_PROJECTS);
+                const container = document.getElementById('projectsListContainer');
+                container.innerHTML = '';
+                if (projects.length === 0) {
+                    container.innerHTML = '<p>No projects yet. Click "+ New Project" to add one.</p>';
+                    return;
+                }
+                projects.sort((a,b) => (a.name > b.name) ? 1 : -1); // Sort by name
+                for (const project of projects) {
+                    const donations = await getByIndex(STORE_DONATIONS, 'projectId', project.id);
+                    const totalDonated = donations.filter(d => d.type === 'donation').reduce((sum, d) => sum + d.amount, 0);
+                    const progress = project.targetAmount > 0 ? (totalDonated / project.targetAmount) * 100 : 0;
+
+                    const card = document.createElement('div');
+                    card.className = 'card project-card';
+                    card.innerHTML = `
+                        <h3>${project.name}</h3>
+                        <p><strong>Goal:</strong> ${project.goal}</p>
+                        <p><strong>Target:</strong> $${project.targetAmount.toLocaleString()}</p>
+                        <p><strong>Donated:</strong> $${totalDonated.toLocaleString()}</p>
+                        <div class="progress-bar-container">
+                            <div class="progress-bar" style="width: ${Math.min(progress, 100)}%;">${Math.min(progress, 100).toFixed(0)}%</div>
+                        </div>
+                        <div class="actions" style="margin-top:10px;">
+                            <button onclick="viewProjectDetails(${project.id})">View Details</button>
+                            <button class="secondary" onclick="editProject(${project.id})">Edit</button>
+                            <button class="danger" onclick="deleteProject(${project.id})">Delete</button>
+                        </div>
+                    `;
+                    container.appendChild(card);
+                }
+            } catch (error) {
+                console.error('Error loading projects:', error);
+                alert(`Error loading projects: ${error}`);
+            }
+        }
+
+        document.getElementById('projectForm').addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const id = document.getElementById('projectId').value;
+            const projectData = {
+                name: document.getElementById('projectName').value,
+                goal: document.getElementById('projectGoal').value,
+                targetAmount: parseFloat(document.getElementById('projectTargetAmount').value),
+                description: document.getElementById('projectDescription').value,
+                createdAt: new Date().toISOString()
+            };
+
+            try {
+                if (id) { // Editing existing project
+                    projectData.id = parseInt(id);
+                    await updateInStore(STORE_PROJECTS, projectData);
+                } else { // Adding new project
+                    await addToStore(STORE_PROJECTS, projectData);
+                }
+                closeModal('projectModal');
+                loadProjects();
+                loadDashboard(); // Update dashboard stats
+            } catch (error) {
+                console.error('Error saving project:', error);
+                alert(`Error saving project: ${error}`);
+            }
+        });
+
+        async function editProject(id) {
+            try {
+                const project = await getFromStore(STORE_PROJECTS, id);
+                if (project) {
+                    document.getElementById('projectModalTitle').textContent = 'Edit Project';
+                    document.getElementById('projectId').value = project.id;
+                    document.getElementById('projectName').value = project.name;
+                    document.getElementById('projectGoal').value = project.goal;
+                    document.getElementById('projectTargetAmount').value = project.targetAmount;
+                    document.getElementById('projectDescription').value = project.description;
+                    showModal('projectModal');
+                }
+            } catch (error) {
+                console.error('Error fetching project for edit:', error);
+                alert(`Error fetching project for edit: ${error}`);
+            }
+        }
+
+        async function deleteProject(id) {
+            if (confirm('Are you sure you want to delete this project and all its related data (donations, expenses, etc.)? This action cannot be undone.')) {
+                try {
+                    await deleteFromStore(STORE_PROJECTS, id);
+                    // Also delete related data
+                    const relatedStores = [STORE_DONATIONS, STORE_EXPENSES, STORE_MILESTONES, STORE_PHOTOS, STORE_PROJECT_NOTES];
+                    for (const storeName of relatedStores) {
+                        const items = await getByIndex(storeName, 'projectId', id);
+                        for (const item of items) {
+                            await deleteFromStore(storeName, item.id);
+                        }
+                    }
+                    loadProjects();
+                    loadDashboard();
+                    if (currentProjectId === id) { // If viewing the deleted project, go back
+                        navigateTo('projects');
+                    }
+                } catch (error) {
+                    console.error('Error deleting project:', error);
+                    alert(`Error deleting project: ${error}`);
+                }
+            }
+        }
+
+        function viewProjectDetails(id) {
+            navigateTo('projects', id);
+        }
+
+        async function loadProjectDetail(projectId) {
+            currentProjectId = projectId; // Ensure currentProjectId is set
+            try {
+                const project = await getFromStore(STORE_PROJECTS, projectId);
+                if (!project) {
+                    alert('Project not found.');
+                    navigateTo('projects');
+                    return;
+                }
+                document.getElementById('projectDetailName').textContent = project.name;
+                
+                // Load financial summary
+                await loadProjectFinancialSummary(projectId);
+                
+                // Load data for each tab
+                await loadDonations(projectId);
+                await loadExpenses(projectId);
+                await loadMilestones(projectId);
+                await loadPhotos(projectId);
+                await loadProjectNotes(projectId);
+
+                // Set default tab
+                switchTab('donations');
+
+            } catch (error) {
+                console.error('Error loading project details:', error);
+                alert(`Error loading project details: ${error}`);
+            }
+        }
+        
+        async function loadProjectFinancialSummary(projectId) {
+            const project = await getFromStore(STORE_PROJECTS, projectId);
+            const donations = await getByIndex(STORE_DONATIONS, 'projectId', projectId);
+            const expenses = await getByIndex(STORE_EXPENSES, 'projectId', projectId);
+
+            const totalDonated = donations.filter(d => d.type === 'donation').reduce((sum, d) => sum + d.amount, 0);
+            const totalPledged = donations.filter(d => d.type === 'pledge').reduce((sum, d) => sum + d.amount, 0);
+            const totalSpent = expenses.reduce((sum, e) => sum + e.amount, 0);
+            
+            const progress = project.targetAmount > 0 ? (totalDonated / project.targetAmount) * 100 : 0;
+            const remainingTarget = Math.max(0, project.targetAmount - totalDonated);
+            const balance = totalDonated - totalSpent;
+
+            const summaryDiv = document.getElementById('projectFinancialSummary');
+            summaryDiv.innerHTML = `
+                <h4>Financial Overview</h4>
+                <p><strong>Target Amount:</strong> $${project.targetAmount.toLocaleString()}</p>
+                <div class="progress-bar-container">
+                    <div class="progress-bar" style="width: ${Math.min(progress, 100)}%;">${Math.min(progress, 100).toFixed(0)}% Funded</div>
+                </div>
+                <p><strong>Total Donated:</strong> $${totalDonated.toLocaleString()}</p>
+                <p><strong>Total Pledged:</strong> $${totalPledged.toLocaleString()}</p>
+                <p><strong>Total Spent:</strong> $${totalSpent.toLocaleString()}</p>
+                <p><strong>Remaining to Target:</strong> $${remainingTarget.toLocaleString()}</p>
+                <p><strong>Current Balance (Donated - Spent):</strong> $${balance.toLocaleString()}</p>
+            `;
+        }
+
+        // Donations
+        async function loadDonations(projectId) {
+            const donations = (await getByIndex(STORE_DONATIONS, 'projectId', projectId)).sort((a,b) => new Date(b.date) - new Date(a.date));
+            const container = document.getElementById('donationsList');
+            container.innerHTML = '';
+            if (donations.length === 0) {
+                container.innerHTML = '<p>No donations or pledges yet.</p>';
+                return;
+            }
+            donations.forEach(d => {
+                const item = document.createElement('div');
+                item.className = 'list-item';
+                item.innerHTML = `
+                    <strong>${d.donorName}</strong> - $${d.amount.toLocaleString()} (${d.type}) on ${formatDate(d.date)}
+                    <div class="actions" style="float:right;">
+                        <button class="small-btn secondary" onclick="editDonation(${d.id}, ${projectId})">Edit</button>
+                        <button class="small-btn danger" onclick="deleteDonation(${d.id}, ${projectId})">Del</button>
+                    </div>
+                `;
+                container.appendChild(item);
+            });
+        }
+        document.getElementById('donationForm').addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const donationData = {
+                projectId: parseInt(document.getElementById('donationProjectId').value),
+                donorName: document.getElementById('donorName').value,
+                amount: parseFloat(document.getElementById('donationAmount').value),
+                date: document.getElementById('donationDate').value,
+                type: document.getElementById('donationType').value,
+            };
+            const id = document.getElementById('donationId').value;
+            try {
+                if (id) {
+                    donationData.id = parseInt(id);
+                    await updateInStore(STORE_DONATIONS, donationData);
+                } else {
+                    await addToStore(STORE_DONATIONS, donationData);
+                }
+                closeModal('donationModal');
+                await loadDonations(donationData.projectId);
+                await loadProjectFinancialSummary(donationData.projectId);
+                await loadDashboard(); // Update dashboard if needed
+            } catch (error) {
+                console.error('Error saving donation:', error);
+                alert(`Error saving donation: ${error}`);
+            }
+        });
+        async function editDonation(id, projectId) {
+            const donation = await getFromStore(STORE_DONATIONS, id);
+            if (donation) {
+                document.getElementById('donationModalTitle').textContent = 'Edit Donation/Pledge';
+                document.getElementById('donationProjectId').value = projectId;
+                document.getElementById('donationId').value = donation.id;
+                document.getElementById('donorName').value = donation.donorName;
+                document.getElementById('donationAmount').value = donation.amount;
+                document.getElementById('donationDate').value = donation.date;
+                document.getElementById('donationType').value = donation.type;
+                showModal('donationModal');
+            }
+        }
+        async function deleteDonation(id, projectId) {
+            if (confirm('Delete this donation/pledge?')) {
+                await deleteFromStore(STORE_DONATIONS, id);
+                await loadDonations(projectId);
+                await loadProjectFinancialSummary(projectId);
+                await loadDashboard();
+            }
+        }
+
+        // Expenses
+        async function loadExpenses(projectId) {
+            const expenses = (await getByIndex(STORE_EXPENSES, 'projectId', projectId)).sort((a,b) => new Date(b.date) - new Date(a.date));
+            const container = document.getElementById('expensesList');
+            container.innerHTML = '';
+            if (expenses.length === 0) {
+                container.innerHTML = '<p>No expenses logged yet.</p>';
+                return;
+            }
+            expenses.forEach(e => {
+                const item = document.createElement('div');
+                item.className = 'list-item';
+                item.innerHTML = `
+                    <strong>${e.description}</strong> - $${e.amount.toLocaleString()} on ${formatDate(e.date)}
+                    <div class="actions" style="float:right;">
+                        <button class="small-btn secondary" onclick="editExpense(${e.id}, ${projectId})">Edit</button>
+                        <button class="small-btn danger" onclick="deleteExpense(${e.id}, ${projectId})">Del</button>
+                    </div>
+                `;
+                container.appendChild(item);
+            });
+        }
+        document.getElementById('expenseForm').addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const expenseData = {
+                projectId: parseInt(document.getElementById('expenseProjectId').value),
+                description: document.getElementById('expenseDescription').value,
+                amount: parseFloat(document.getElementById('expenseAmount').value),
+                date: document.getElementById('expenseDate').value,
+            };
+            const id = document.getElementById('expenseId').value;
+            try {
+                if (id) {
+                    expenseData.id = parseInt(id);
+                    await updateInStore(STORE_EXPENSES, expenseData);
+                } else {
+                    await addToStore(STORE_EXPENSES, expenseData);
+                }
+                closeModal('expenseModal');
+                await loadExpenses(expenseData.projectId);
+                await loadProjectFinancialSummary(expenseData.projectId);
+                await loadDashboard();
+            } catch (error) {
+                console.error('Error saving expense:', error);
+                alert(`Error saving expense: ${error}`);
+            }
+        });
+        async function editExpense(id, projectId) {
+            const expense = await getFromStore(STORE_EXPENSES, id);
+            if (expense) {
+                document.getElementById('expenseModalTitle').textContent = 'Edit Expense';
+                document.getElementById('expenseProjectId').value = projectId;
+                document.getElementById('expenseId').value = expense.id;
+                document.getElementById('expenseDescription').value = expense.description;
+                document.getElementById('expenseAmount').value = expense.amount;
+                document.getElementById('expenseDate').value = expense.date;
+                showModal('expenseModal');
+            }
+        }
+        async function deleteExpense(id, projectId) {
+            if (confirm('Delete this expense?')) {
+                await deleteFromStore(STORE_EXPENSES, id);
+                await loadExpenses(projectId);
+                await loadProjectFinancialSummary(projectId);
+                await loadDashboard();
+            }
+        }
+
+        // Milestones
+        async function loadMilestones(projectId) {
+            const milestones = (await getByIndex(STORE_MILESTONES, 'projectId', projectId)).sort((a,b) => new Date(b.date) - new Date(a.date));
+            const container = document.getElementById('milestonesList');
+            container.innerHTML = '';
+            if (milestones.length === 0) {
+                container.innerHTML = '<p>No milestones defined yet.</p>';
+                return;
+            }
+            milestones.forEach(m => {
+                const item = document.createElement('div');
+                item.className = 'list-item';
+                item.innerHTML = `
+                    <strong>${m.description}</strong> - <span class="milestone-status-${m.status.replace(' ', '_').toLowerCase()}">${m.status.replace('_',' ')}</span> on ${formatDate(m.date)}
+                    <div class="actions" style="float:right;">
+                        <button class="small-btn secondary" onclick="editMilestone(${m.id}, ${projectId})">Edit</button>
+                        <button class="small-btn danger" onclick="deleteMilestone(${m.id}, ${projectId})">Del</button>
+                    </div>
+                `;
+                container.appendChild(item);
+            });
+        }
+        document.getElementById('milestoneForm').addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const milestoneData = {
+                projectId: parseInt(document.getElementById('milestoneProjectId').value),
+                description: document.getElementById('milestoneDescription').value,
+                date: document.getElementById('milestoneDate').value,
+                status: document.getElementById('milestoneStatus').value,
+            };
+            const id = document.getElementById('milestoneId').value;
+            try {
+                if (id) {
+                    milestoneData.id = parseInt(id);
+                    await updateInStore(STORE_MILESTONES, milestoneData);
+                } else {
+                    await addToStore(STORE_MILESTONES, milestoneData);
+                }
+                closeModal('milestoneModal');
+                await loadMilestones(milestoneData.projectId);
+            } catch (error) {
+                console.error('Error saving milestone:', error);
+                alert(`Error saving milestone: ${error}`);
+            }
+        });
+        async function editMilestone(id, projectId) {
+            const milestone = await getFromStore(STORE_MILESTONES, id);
+            if (milestone) {
+                document.getElementById('milestoneModalTitle').textContent = 'Edit Milestone';
+                document.getElementById('milestoneProjectId').value = projectId;
+                document.getElementById('milestoneId').value = milestone.id;
+                document.getElementById('milestoneDescription').value = milestone.description;
+                document.getElementById('milestoneDate').value = milestone.date;
+                document.getElementById('milestoneStatus').value = milestone.status;
+                showModal('milestoneModal');
+            }
+        }
+        async function deleteMilestone(id, projectId) {
+            if (confirm('Delete this milestone?')) {
+                await deleteFromStore(STORE_MILESTONES, id);
+                await loadMilestones(projectId);
+            }
+        }
+        
+        // Photos
+        async function loadPhotos(projectId) {
+            const photos = (await getByIndex(STORE_PHOTOS, 'projectId', projectId)).sort((a,b) => new Date(b.date) - new Date(a.date));
+            const container = document.getElementById('photosLog');
+            container.innerHTML = '';
+            if (photos.length === 0) {
+                container.innerHTML = '<p>No photos uploaded yet.</p>';
+                return;
+            }
+            photos.forEach(p => {
+                const imgContainer = document.createElement('div');
+                imgContainer.style.display = 'inline-block';
+                imgContainer.style.textAlign = 'center';
+                imgContainer.style.margin = '5px';
+
+                const img = document.createElement('img');
+                img.src = p.imageData;
+                img.alt = p.caption;
+                img.title = `${p.caption} (${formatDate(p.date)})`;
+                img.onclick = () => showImageDetailModal(p.imageData, p.caption);
+
+                const captionP = document.createElement('p');
+                captionP.textContent = `${p.caption.substring(0,20)}${p.caption.length > 20 ? '...' : ''} (${formatDate(p.date)})`;
+                captionP.style.fontSize = '0.8em';
+                
+                const deleteBtn = document.createElement('button');
+                deleteBtn.textContent = 'Delete';
+                deleteBtn.className = 'small-btn danger';
+                deleteBtn.style.fontSize = '0.7em';
+                deleteBtn.style.padding = '2px 5px';
+                deleteBtn.onclick = (e) => { e.stopPropagation(); deletePhoto(p.id, projectId); };
+
+                imgContainer.appendChild(img);
+                imgContainer.appendChild(captionP);
+                imgContainer.appendChild(deleteBtn);
+                container.appendChild(imgContainer);
+            });
+        }
+        document.getElementById('photoForm').addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const photoFile = document.getElementById('photoFile').files[0];
+            const reader = new FileReader();
+            reader.onloadend = async () => {
+                const photoData = {
+                    projectId: parseInt(document.getElementById('photoProjectId').value),
+                    imageData: reader.result,
+                    caption: document.getElementById('photoCaption').value,
+                    date: document.getElementById('photoDate').value,
+                };
+                try {
+                    await addToStore(STORE_PHOTOS, photoData);
+                    closeModal('photoModal');
+                    await loadPhotos(photoData.projectId);
+                } catch (error) {
+                    console.error('Error saving photo:', error);
+                    alert(`Error saving photo: ${error}`);
+                }
+            };
+            if (photoFile) {
+                reader.readAsDataURL(photoFile);
+            } else {
+                alert("Please select a photo file.");
+            }
+        });
+        document.getElementById('photoFile').onchange = (evt) => {
+            const [file] = evt.target.files;
+            if (file) {
+                document.getElementById('photoPreview').src = URL.createObjectURL(file);
+                document.getElementById('photoPreview').style.display = 'block';
+            } else {
+                document.getElementById('photoPreview').style.display = 'none';
+            }
+        };
+        async function deletePhoto(id, projectId) {
+            if (confirm('Delete this photo?')) {
+                await deleteFromStore(STORE_PHOTOS, id);
+                await loadPhotos(projectId);
+            }
+        }
+        function showImageDetailModal(src, caption) {
+            document.getElementById('imageDetailModalSrc').src = src;
+            document.getElementById('imageDetailModalCaption').textContent = caption;
+            showModal('imageDetailModal');
+        }
+
+        // Project Notes
+        async function loadProjectNotes(projectId) {
+            const notes = (await getByIndex(STORE_PROJECT_NOTES, 'projectId', projectId)).sort((a,b) => new Date(b.date) - new Date(a.date));
+            const container = document.getElementById('projectNotesList');
+            container.innerHTML = '';
+            if (notes.length === 0) {
+                container.innerHTML = '<p>No notes for this project yet.</p>';
+                return;
+            }
+            notes.forEach(n => {
+                const item = document.createElement('div');
+                item.className = 'list-item';
+                item.innerHTML = `
+                    <p>${n.noteText.replace(/\n/g, '<br>')}</p>
+                    <small>Dated: ${formatDate(n.date)}</small>
+                    <div class="actions" style="float:right;">
+                        <button class="small-btn secondary" onclick="editProjectNote(${n.id}, ${projectId})">Edit</button>
+                        <button class="small-btn danger" onclick="deleteProjectNote(${n.id}, ${projectId})">Del</button>
+                    </div>
+                `;
+                container.appendChild(item);
+            });
+        }
+        document.getElementById('projectNoteForm').addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const noteData = {
+                projectId: parseInt(document.getElementById('projectNoteProjectId').value),
+                noteText: document.getElementById('projectNoteText').value,
+                date: document.getElementById('projectNoteDate').value,
+            };
+            const id = document.getElementById('projectNoteId').value;
+            try {
+                if (id) {
+                    noteData.id = parseInt(id);
+                    await updateInStore(STORE_PROJECT_NOTES, noteData);
+                } else {
+                    await addToStore(STORE_PROJECT_NOTES, noteData);
+                }
+                closeModal('projectNoteModal');
+                await loadProjectNotes(noteData.projectId);
+            } catch (error) {
+                console.error('Error saving project note:', error);
+                alert(`Error saving project note: ${error}`);
+            }
+        });
+        async function editProjectNote(id, projectId) {
+            const note = await getFromStore(STORE_PROJECT_NOTES, id);
+            if (note) {
+                document.getElementById('projectNoteModalTitle').textContent = 'Edit Project Note';
+                document.getElementById('projectNoteProjectId').value = projectId;
+                document.getElementById('projectNoteId').value = note.id;
+                document.getElementById('projectNoteText').value = note.noteText;
+                document.getElementById('projectNoteDate').value = note.date;
+                showModal('projectNoteModal');
+            }
+        }
+        async function deleteProjectNote(id, projectId) {
+            if (confirm('Delete this note?')) {
+                await deleteFromStore(STORE_PROJECT_NOTES, id);
+                await loadProjectNotes(projectId);
+            }
+        }
+
+        // Contacts
+        async function loadContacts() {
+            const contacts = (await getAllFromStore(STORE_CONTACTS)).sort((a,b) => (a.name > b.name) ? 1 : -1);
+            const container = document.getElementById('contactsListContainer');
+            container.innerHTML = '';
+            if (contacts.length === 0) {
+                container.innerHTML = '<p>No contacts yet. Click "+ New Contact" to add one.</p>';
+                return;
+            }
+            contacts.forEach(c => {
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.innerHTML = `
+                    <h3>${c.name}</h3>
+                    <p><strong>Role:</strong> ${c.role || 'N/A'}</p>
+                    <p><strong>Contact:</strong> ${c.contactInfo || 'N/A'}</p>
+                    ${c.notes ? `<p><strong>Notes:</strong> ${c.notes.replace(/\n/g, '<br>')}</p>` : ''}
+                    <div class="actions" style="margin-top:10px;">
+                        <button class="secondary" onclick="editContact(${c.id})">Edit</button>
+                        <button class="danger" onclick="deleteContact(${c.id})">Delete</button>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+        document.getElementById('contactForm').addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const contactData = {
+                name: document.getElementById('contactName').value,
+                role: document.getElementById('contactRole').value,
+                contactInfo: document.getElementById('contactInfo').value,
+                notes: document.getElementById('contactNotes').value,
+            };
+            const id = document.getElementById('contactId').value;
+            try {
+                if (id) {
+                    contactData.id = parseInt(id);
+                    await updateInStore(STORE_CONTACTS, contactData);
+                } else {
+                    await addToStore(STORE_CONTACTS, contactData);
+                }
+                closeModal('contactModal');
+                await loadContacts();
+            } catch (error) {
+                console.error('Error saving contact:', error);
+                alert(`Error saving contact: ${error}`);
+            }
+        });
+        async function editContact(id) {
+            const contact = await getFromStore(STORE_CONTACTS, id);
+            if (contact) {
+                document.getElementById('contactModalTitle').textContent = 'Edit Contact';
+                document.getElementById('contactId').value = contact.id;
+                document.getElementById('contactName').value = contact.name;
+                document.getElementById('contactRole').value = contact.role;
+                document.getElementById('contactInfo').value = contact.contactInfo;
+                document.getElementById('contactNotes').value = contact.notes;
+                showModal('contactModal');
+            }
+        }
+        async function deleteContact(id) {
+            if (confirm('Delete this contact?')) {
+                await deleteFromStore(STORE_CONTACTS, id);
+                await loadContacts();
+            }
+        }
+        
+        // Dashboard
+        async function loadDashboard() {
+            const projects = await getAllFromStore(STORE_PROJECTS);
+            const dashboardGrid = document.getElementById('dashboardGrid');
+            dashboardGrid.innerHTML = '';
+
+            let totalTarget = 0, totalDonatedOverall = 0, totalSpentOverall = 0, activeProjects = 0;
+
+            if (projects.length === 0) {
+                dashboardGrid.innerHTML = '<p class="card">No projects available. Create one in the Projects section.</p>';
+            }
+
+            for (const project of projects) {
+                const donations = await getByIndex(STORE_DONATIONS, 'projectId', project.id);
+                const expenses = await getByIndex(STORE_EXPENSES, 'projectId', project.id);
+                
+                const projectDonated = donations.filter(d => d.type === 'donation').reduce((sum, d) => sum + d.amount, 0);
+                const projectSpent = expenses.reduce((sum, e) => sum + e.amount, 0);
+                
+                totalTarget += project.targetAmount;
+                totalDonatedOverall += projectDonated;
+                totalSpentOverall += projectSpent;
+                
+                // Consider a project "active" if not fully funded or has ongoing activity (e.g. recent expenses/milestones)
+                // For simplicity here, just count all projects.
+                activeProjects++;
+            }
+
+            const overallProgress = totalTarget > 0 ? (totalDonatedOverall / totalTarget) * 100 : 0;
+
+            dashboardGrid.innerHTML = `
+                <div class="card"><h3>Total Projects</h3><p style="font-size: 2em;">${projects.length}</p></div>
+                <div class="card"><h3>Overall Funding Progress</h3>
+                    <div class="progress-bar-container" style="margin-top:10px;">
+                        <div class="progress-bar" style="width: ${Math.min(overallProgress, 100)}%;">${Math.min(overallProgress, 100).toFixed(0)}%</div>
+                    </div>
+                    <p>$${totalDonatedOverall.toLocaleString()} raised of $${totalTarget.toLocaleString()}</p>
+                </div>
+                <div class="card"><h3>Total Donated</h3><p style="font-size: 2em; color: var(--accent-color);">$${totalDonatedOverall.toLocaleString()}</p></div>
+                <div class="card"><h3>Total Spent</h3><p style="font-size: 2em; color: var(--secondary-color);">$${totalSpentOverall.toLocaleString()}</p></div>
+            `;
+            
+            // Recent Activity (simple version: last 3 donations/expenses across all projects)
+            const recentActivityContainer = document.getElementById('recentActivity');
+            const allDonations = await getAllFromStore(STORE_DONATIONS);
+            const allExpenses = await getAllFromStore(STORE_EXPENSES);
+            const activity = [
+                ...allDonations.map(d => ({ ...d, itemType: 'Donation', text: `${d.donorName} donated $${d.amount}`})),
+                ...allExpenses.map(e => ({ ...e, itemType: 'Expense', text: `Expense of $${e.amount} for ${e.description}`}))
+            ].sort((a,b) => new Date(b.date) - new Date(a.date)).slice(0, 5);
+
+            if (activity.length > 0) {
+                recentActivityContainer.innerHTML = '<ul>' + activity.map(async (item) => {
+                    const project = item.projectId ? await getFromStore(STORE_PROJECTS, item.projectId) : null;
+                    const projectName = project ? project.name : 'General';
+                    return `<li class="list-item">${item.itemType} for <strong>${projectName}</strong>: ${item.text} on ${formatDate(item.date)}</li>`;
+                }).join('') + '</ul>';
+                // Since the map includes an await, this needs to be handled properly.
+                // For simplicity, I'll do it sequentially.
+                let activityHTML = '<ul>';
+                for (const item of activity) {
+                    const project = item.projectId ? await getFromStore(STORE_PROJECTS, item.projectId) : null;
+                    const projectName = project ? project.name : 'Unknown Project';
+                    activityHTML += `<li class="list-item">${item.itemType} for <strong>${projectName}</strong>: ${item.text} on ${formatDate(item.date)}</li>`;
+                }
+                activityHTML += '</ul>';
+                recentActivityContainer.innerHTML = activityHTML;
+
+            } else {
+                recentActivityContainer.innerHTML = '<p>No recent activity yet.</p>';
+            }
+        }
+
+        // Export Project Summary
+        async function exportProjectSummary(projectId) {
+            const project = await getFromStore(STORE_PROJECTS, projectId);
+            if (!project) {
+                alert('Project not found for export.');
+                return;
+            }
+
+            const donations = await getByIndex(STORE_DONATIONS, 'projectId', projectId);
+            const expenses = await getByIndex(STORE_EXPENSES, 'projectId', projectId);
+            const milestones = await getByIndex(STORE_MILESTONES, 'projectId', projectId);
+
+            const totalDonated = donations.filter(d => d.type === 'donation').reduce((sum, d) => sum + d.amount, 0);
+            const totalPledged = donations.filter(d => d.type === 'pledge').reduce((sum, d) => sum + d.amount, 0);
+            const totalSpent = expenses.reduce((sum, e) => sum + e.amount, 0);
+            const balance = totalDonated - totalSpent;
+
+            let summaryText = `Project Summary: ${project.name}\n`;
+            summaryText += `========================================\n\n`;
+            summaryText += `Goal: ${project.goal}\n`;
+            summaryText += `Description: ${project.description}\n`;
+            summaryText += `Target Amount: $${project.targetAmount.toLocaleString()}\n\n`;
+            
+            summaryText += `Financials:\n`;
+            summaryText += `  Total Donated: $${totalDonated.toLocaleString()}\n`;
+            summaryText += `  Total Pledged: $${totalPledged.toLocaleString()}\n`;
+            summaryText += `  Total Spent: $${totalSpent.toLocaleString()}\n`;
+            summaryText += `  Balance (Donated - Spent): $${balance.toLocaleString()}\n\n`;
+
+            summaryText += `Donations/Pledges (${donations.length}):\n`;
+            if (donations.length > 0) {
+                donations.forEach(d => {
+                    summaryText += `  - ${d.donorName}: $${d.amount.toLocaleString()} (${d.type}) on ${formatDate(d.date)}\n`;
+                });
+            } else {
+                summaryText += `  No donations or pledges.\n`;
+            }
+            summaryText += `\n`;
+
+            summaryText += `Expenses (${expenses.length}):\n`;
+            if (expenses.length > 0) {
+                expenses.forEach(e => {
+                    summaryText += `  - ${e.description}: $${e.amount.toLocaleString()} on ${formatDate(e.date)}\n`;
+                });
+            } else {
+                summaryText += `  No expenses.\n`;
+            }
+            summaryText += `\n`;
+
+            summaryText += `Milestones (${milestones.length}):\n`;
+            if (milestones.length > 0) {
+                milestones.forEach(m => {
+                    summaryText += `  - ${m.description}: ${m.status} (Due/Completed: ${formatDate(m.date)})\n`;
+                });
+            } else {
+                summaryText += `  No milestones.\n`;
+            }
+            summaryText += `\nReport Generated: ${new Date().toLocaleString()}\n`;
+
+            const blob = new Blob([summaryText], { type: 'text/plain' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `${project.name.replace(/\s+/g, '_')}_Summary.txt`;
+            link.click();
+            URL.revokeObjectURL(link.href);
+            alert('Project summary exported!');
+        }
+
+
+        // Backup & Restore
+        document.getElementById('backupDataBtn').addEventListener('click', async () => {
+            try {
+                const backupData = {};
+                const storesToBackup = [STORE_PROJECTS, STORE_DONATIONS, STORE_EXPENSES, STORE_MILESTONES, STORE_PHOTOS, STORE_PROJECT_NOTES, STORE_CONTACTS];
+                for (const storeName of storesToBackup) {
+                    backupData[storeName] = await getAllFromStore(storeName);
+                }
+                const jsonString = JSON.stringify(backupData, null, 2);
+                const blob = new Blob([jsonString], { type: 'application/json' });
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(blob);
+                link.download = `JariyahProjectsBackup_${new Date().toISOString().slice(0,10)}.json`;
+                link.click();
+                URL.revokeObjectURL(link.href);
+                alert('Data backup successful!');
+            } catch (error) {
+                console.error('Backup error:', error);
+                alert(`Backup failed: ${error}`);
+            }
+        });
+
+        document.getElementById('restoreDataBtn').addEventListener('click', () => {
+            const fileInput = document.getElementById('restoreFile');
+            if (!fileInput.files.length) {
+                alert('Please select a backup file to restore.');
+                return;
+            }
+            if (!confirm('Restoring data will overwrite ALL current data. Are you sure you want to proceed?')) {
+                return;
+            }
+
+            const file = fileInput.files[0];
+            const reader = new FileReader();
+            reader.onload = async (event) => {
+                try {
+                    const backupData = JSON.parse(event.target.result);
+                    const transaction = db.transaction(db.objectStoreNames, 'readwrite');
+                    
+                    // Clear existing data
+                    for (const storeName of db.objectStoreNames) {
+                        await new Promise((resolve, reject) => {
+                            const req = transaction.objectStore(storeName).clear();
+                            req.onsuccess = resolve;
+                            req.onerror = reject;
+                        });
+                    }
+
+                    // Add new data
+                    for (const storeName in backupData) {
+                        if (db.objectStoreNames.contains(storeName) && Array.isArray(backupData[storeName])) {
+                            const store = transaction.objectStore(storeName);
+                            for (const item of backupData[storeName]) {
+                                // Remove 'id' if store has autoIncrement, to avoid constraint errors if IDs are not managed by user
+                                // However, for this app, IDs are critical for relationships.
+                                // Assuming backup file has valid data structure.
+                                store.put(item); // Use put to handle items with existing IDs
+                            }
+                        }
+                    }
+                    
+                    transaction.oncomplete = () => {
+                        alert('Data restored successfully! The app will now reload.');
+                        // Reload all data displays
+                        navigateTo('dashboard');
+                        loadProjects();
+                        loadContacts();
+                        loadDashboard();
+                    };
+                    transaction.onerror = (err) => {
+                        console.error('Restore transaction error:', err);
+                        alert(`Restore failed during transaction: ${err}`);
+                    };
+
+                } catch (error) {
+                    console.error('Restore error:', error);
+                    alert(`Restore failed: ${error}. Make sure it's a valid backup file.`);
+                }
+            };
+            reader.readAsText(file);
+        });
+
+        // Theme Toggler
+        function applyTheme(theme) {
+            document.documentElement.setAttribute('data-theme', theme);
+            localStorage.setItem('jariyahTheme', theme);
+            document.getElementById('currentThemeLabel').textContent = theme === 'dark' ? 'Dark' : 'Light';
+        }
+
+        const themeToggleButtons = [document.getElementById('themeToggleBtn'), document.getElementById('settingsThemeToggleBtn')];
+        themeToggleButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
+                const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+                applyTheme(newTheme);
+            });
+        });
+        
+        // --- Event Listeners & App Initialization ---
+        document.addEventListener('DOMContentLoaded', async () => {
+            document.getElementById('currentYear').textContent = new Date().getFullYear();
+            try {
+                await openDB();
+                console.log('Database initialized.');
+
+                const savedTheme = localStorage.getItem('jariyahTheme') || 'light';
+                applyTheme(savedTheme);
+
+                // Check if sample data needs to be loaded
+                const projects = await getAllFromStore(STORE_PROJECTS);
+                if (projects.length === 0) {
+                    await addSampleData();
+                    console.log('Sample data loaded.');
+                }
+
+                navigateTo('dashboard'); // Initial page
+
+                // Navigation links
+                document.querySelectorAll('.nav-link').forEach(link => {
+                    link.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        const pageId = link.getAttribute('href').substring(1);
+                        navigateTo(pageId);
+                    });
+                });
+
+                // Modal Triggers
+                document.getElementById('addProjectBtn').addEventListener('click', () => {
+                    document.getElementById('projectModalTitle').textContent = 'Add New Project';
+                    document.getElementById('projectForm').reset();
+                    document.getElementById('projectId').value = ''; // Clear ID for new entry
+                    showModal('projectModal');
+                });
+                document.getElementById('addContactBtn').addEventListener('click', () => {
+                    document.getElementById('contactModalTitle').textContent = 'Add New Contact';
+                    document.getElementById('contactForm').reset();
+                    document.getElementById('contactId').value = '';
+                    showModal('contactModal');
+                });
+                
+                // Project Detail Buttons
+                document.getElementById('backToProjectsBtn').addEventListener('click', () => navigateTo('projects'));
+                
+                document.getElementById('addDonationBtn').addEventListener('click', () => {
+                    document.getElementById('donationModalTitle').textContent = 'Add Donation/Pledge';
+                    document.getElementById('donationForm').reset();
+                    document.getElementById('donationId').value = '';
+                    document.getElementById('donationProjectId').value = currentProjectId;
+                    document.getElementById('donationDate').valueAsDate = new Date(); // Default to today
+                    showModal('donationModal');
+                });
+                document.getElementById('addExpenseBtn').addEventListener('click', () => {
+                    document.getElementById('expenseModalTitle').textContent = 'Add Expense';
+                    document.getElementById('expenseForm').reset();
+                    document.getElementById('expenseId').value = '';
+                    document.getElementById('expenseProjectId').value = currentProjectId;
+                    document.getElementById('expenseDate').valueAsDate = new Date();
+                    showModal('expenseModal');
+                });
+                document.getElementById('addMilestoneBtn').addEventListener('click', () => {
+                    document.getElementById('milestoneModalTitle').textContent = 'Add Milestone';
+                    document.getElementById('milestoneForm').reset();
+                    document.getElementById('milestoneId').value = '';
+                    document.getElementById('milestoneProjectId').value = currentProjectId;
+                    document.getElementById('milestoneDate').valueAsDate = new Date();
+                    showModal('milestoneModal');
+                });
+                document.getElementById('addPhotoBtn').addEventListener('click', () => {
+                    document.getElementById('photoModalTitle').textContent = 'Add Photo';
+                    document.getElementById('photoForm').reset();
+                    document.getElementById('photoProjectId').value = currentProjectId;
+                    document.getElementById('photoDate').valueAsDate = new Date();
+                    document.getElementById('photoPreview').style.display = 'none';
+                    document.getElementById('photoPreview').src = '#';
+                    showModal('photoModal');
+                });
+                document.getElementById('addProjectNoteBtn').addEventListener('click', () => {
+                    document.getElementById('projectNoteModalTitle').textContent = 'Add Project Note';
+                    document.getElementById('projectNoteForm').reset();
+                    document.getElementById('projectNoteId').value = '';
+                    document.getElementById('projectNoteProjectId').value = currentProjectId;
+                    document.getElementById('projectNoteDate').valueAsDate = new Date();
+                    showModal('projectNoteModal');
+                });
+                document.getElementById('exportProjectSummaryBtn').addEventListener('click', () => {
+                    if (currentProjectId) {
+                        exportProjectSummary(currentProjectId);
+                    } else {
+                        alert('No project selected to export summary.');
+                    }
+                });
+
+                // Project Detail Tabs
+                document.querySelectorAll('#projectDetailView .tab-button').forEach(button => {
+                    button.addEventListener('click', () => {
+                        switchTab(button.dataset.tab);
+                    });
+                });
+
+
+            } catch (error) {
+                console.error('App initialization error:', error);
+                alert('Failed to initialize the application. Please try refreshing. Error: ' + error);
+            }
+        });
+
+        // --- Sample Data Insertion ---
+        async function addSampleData() {
+            const today = new Date();
+            const yesterday = new Date(today);
+            yesterday.setDate(today.getDate() - 1);
+            const twoDaysAgo = new Date(today);
+            twoDaysAgo.setDate(today.getDate() - 2);
+            const oneWeekAgo = new Date(today);
+            oneWeekAgo.setDate(today.getDate() - 7);
+
+
+            const sampleProjects = [
+                { name: "Community Well Alpha", goal: "Provide clean drinking water for 50 families.", targetAmount: 2000, description: "Drilling a new well in Village A.", createdAt: oneWeekAgo.toISOString() },
+                { name: "Orphan Sponsorship Program", goal: "Sponsor 10 orphans for a year.", targetAmount: 3600, description: "Covering education, health, and living expenses.", createdAt: oneWeekAgo.toISOString() },
+                { name: "Masjid Renovation Phase 1", goal: "Repair roof and update wudu area.", targetAmount: 5000, description: "Urgent repairs needed for the local masjid.", createdAt: oneWeekAgo.toISOString() },
+                { name: "Tree Plantation Drive", goal: "Plant 500 fruit trees.", targetAmount: 500, description: "Greening the local park and providing future food source.", createdAt: oneWeekAgo.toISOString() }
+            ];
+            
+            const p1Id = await addToStore(STORE_PROJECTS, sampleProjects[0]);
+            const p2Id = await addToStore(STORE_PROJECTS, sampleProjects[1]);
+            const p3Id = await addToStore(STORE_PROJECTS, sampleProjects[2]);
+            const p4Id = await addToStore(STORE_PROJECTS, sampleProjects[3]);
+
+            const sampleDonations = [
+                { projectId: p1Id, donorName: "Ali Khan", amount: 100, date: twoDaysAgo.toISOString().split('T')[0], type: "donation" },
+                { projectId: p1Id, donorName: "Fatima Ahmed", amount: 50, date: yesterday.toISOString().split('T')[0], type: "donation" },
+                { projectId: p2Id, donorName: "Zainab Malik", amount: 360, date: twoDaysAgo.toISOString().split('T')[0], type: "donation" },
+                { projectId: p3Id, donorName: "Community Fund", amount: 1000, date: yesterday.toISOString().split('T')[0], type: "pledge" },
+                { projectId: p4Id, donorName: "Local Nursery", amount: 50, date: today.toISOString().split('T')[0], type: "donation" },
+            ];
+            for (const donation of sampleDonations) await addToStore(STORE_DONATIONS, donation);
+
+            const sampleExpenses = [
+                { projectId: p1Id, description: "Initial Survey", amount: 50, date: oneWeekAgo.toISOString().split('T')[0] },
+                { projectId: p3Id, description: "Architectural Consultation", amount: 200, date: twoDaysAgo.toISOString().split('T')[0] },
+            ];
+            for (const expense of sampleExpenses) await addToStore(STORE_EXPENSES, expense);
+
+            const sampleMilestones = [
+                { projectId: p1Id, description: "Site Selected", date: oneWeekAgo.toISOString().split('T')[0], status: "completed" },
+                { projectId: p1Id, description: "Drilling Permit Acquired", date: twoDaysAgo.toISOString().split('T')[0], status: "in_progress" },
+                { projectId: p2Id, description: "First 5 Orphans Identified", date: yesterday.toISOString().split('T')[0], status: "completed" },
+            ];
+            for (const milestone of sampleMilestones) await addToStore(STORE_MILESTONES, milestone);
+
+            const sampleContacts = [
+                { name: "Mr. Abdullah (Well Driller)", role: "Contractor", contactInfo: "+92 300 1234567", notes: "Recommended by Village Elder." },
+                { name: "Mrs. Aisha (Orphanage Coordinator)", role: "Partner", contactInfo: "aisha.coordinator@example.org", notes: "Manages the list of eligible orphans." },
+                { name: "Green Earth Nursery", role: "Supplier", contactInfo: "sales@greenearth.pk", notes: "Potential supplier for tree saplings." }
+            ];
+            for (const contact of sampleContacts) await addToStore(STORE_CONTACTS, contact);
+            
+            // Sample project notes and photos can be added if placeholder images are available or generated.
+            // For simplicity, leaving these out of initial sample data unless a simple placeholder can be used for photos.
+            const sampleNotes = [
+                { projectId: p1Id, noteText: "Contacted drilling company. Awaiting quote.", date: yesterday.toISOString().split('T')[0]},
+                { projectId: p3Id, noteText: "Meeting with renovation committee next week.", date: today.toISOString().split('T')[0]}
+            ];
+            for (const note of sampleNotes) await addToStore(STORE_PROJECT_NOTES, note);
+
+            // Placeholder for a very small base64 image (e.g., a 1x1 transparent pixel or a tiny icon)
+            // This is just an example. Real images would be larger.
+            const placeholderImageBase64 = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=";
+            const samplePhotos = [
+                { projectId: p1Id, imageData: placeholderImageBase64, caption: "Well Site Location", date: oneWeekAgo.toISOString().split('T')[0] },
+                { projectId: p4Id, imageData: placeholderImageBase64, caption: "Saplings ready for planting", date: today.toISOString().split('T')[0] }
+            ];
+            for (const photo of samplePhotos) await addToStore(STORE_PHOTOS, photo);
+        }
+
+    </script>
+</body>
+</html>

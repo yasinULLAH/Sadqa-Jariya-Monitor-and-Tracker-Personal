@@ -1,0 +1,1649 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jariyah Projects Monitor</title>
+    <meta name="author" content="Yasin Ullah">
+    <meta name="description" content="Offline Jariyah Projects Monitor for local coordination.">
+    <style>
+        :root {
+            --bg-color: #1a1a2e;
+            --card-bg: rgba(30, 30, 50, 0.8);
+            --text-color: #e0e0e0;
+            --accent-color: #00aaff; /* Blue */
+            --success-color: #00cc99; /* Green */
+            --warning-color: #ffcc00; /* Yellow */
+            --danger-color: #ff6666; /* Red */
+            --border-color: rgba(50, 50, 70, 0.5);
+            --gradient-bg: linear-gradient(135deg, #1a1a2e 0%, #2a2a4a 100%);
+            --card-border-radius: 10px;
+            --padding: 20px;
+            --gap: 20px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--gradient-bg);
+            color: var(--text-color);
+            min-height: 100vh;
+            line-height: 1.6;
+            padding-top: 60px; /* Space for fixed header */
+        }
+
+        #app {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: var(--padding);
+        }
+
+        header {
+            background-color: rgba(30, 30, 50, 0.9);
+            color: var(--text-color);
+            padding: 10px var(--padding);
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 100;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        header h1 {
+            font-size: 1.8em;
+            margin: 0;
+            color: var(--accent-color);
+        }
+
+        nav ul {
+            list-style: none;
+            display: flex;
+            gap: var(--gap);
+        }
+
+        nav a {
+            color: var(--text-color);
+            text-decoration: none;
+            font-weight: bold;
+            padding: 5px 10px;
+            transition: color 0.3s ease;
+        }
+
+        nav a:hover,
+        nav a.active {
+            color: var(--accent-color);
+            border-bottom: 2px solid var(--accent-color);
+        }
+
+        .view {
+            display: none;
+        }
+
+        .view.active {
+            display: block;
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            border-radius: var(--card-border-radius);
+            padding: var(--padding);
+            margin-bottom: var(--gap);
+            border: 1px solid var(--border-color);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        h2, h3 {
+            color: var(--accent-color);
+            margin-bottom: var(--gap);
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 10px;
+        }
+
+        h3 {
+            font-size: 1.3em;
+            margin-top: var(--gap);
+        }
+
+        .button, button {
+            background-color: var(--accent-color);
+            color: var(--bg-color);
+            border: none;
+            border-radius: 5px;
+            padding: 10px 15px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: background-color 0.3s ease, opacity 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .button:hover, button:hover {
+            background-color: #0099e6;
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .button.secondary {
+            background-color: var(--border-color);
+            color: var(--text-color);
+        }
+         .button.secondary:hover {
+            background-color: rgba(70, 70, 90, 0.8);
+        }
+
+        .button.danger {
+            background-color: var(--danger-color);
+            color: var(--text-color);
+        }
+         .button.danger:hover {
+            background-color: #cc5555;
+        }
+
+
+        form label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: var(--text-color);
+        }
+
+        form input[type="text"],
+        form input[type="number"],
+        form input[type="date"],
+        form textarea {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: var(--gap);
+            border: 1px solid var(--border-color);
+            border-radius: 5px;
+            background-color: rgba(40, 40, 60, 0.7);
+            color: var(--text-color);
+            font-size: 1em;
+        }
+
+         form input[type="file"] {
+             margin-bottom: var(--gap);
+         }
+
+        form input[type="text"]:focus,
+        form input[type="number"]:focus,
+        form input[type="date"]:focus,
+        form textarea:focus {
+            outline: none;
+            border-color: var(--accent-color);
+            box-shadow: 0 0 5px rgba(0, 170, 255, 0.5);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .form-group {
+            margin-bottom: var(--gap);
+        }
+
+        .project-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: var(--gap);
+        }
+
+        .project-item {
+            background-color: var(--card-bg);
+            border-radius: var(--card-border-radius);
+            padding: var(--padding);
+            cursor: pointer;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .project-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .project-item h3 {
+            margin-top: 0;
+            margin-bottom: 10px;
+            border-bottom: none;
+            color: var(--text-color);
+        }
+
+        .project-item p {
+            font-size: 0.9em;
+            color: #b0b0b0;
+            flex-grow: 1;
+        }
+
+        .progress-bar-container {
+            width: 100%;
+            background-color: rgba(50, 50, 70, 0.5);
+            border-radius: 5px;
+            overflow: hidden;
+            margin-top: 15px;
+        }
+
+        .progress-bar {
+            height: 15px;
+            background-color: var(--success-color);
+            width: 0%;
+            transition: width 0.5s ease;
+            text-align: center;
+            line-height: 15px;
+            font-size: 0.8em;
+            color: var(--bg-color);
+            font-weight: bold;
+        }
+
+        .financial-summary {
+            margin-top: var(--gap);
+            padding-top: var(--gap);
+            border-top: 1px solid var(--border-color);
+        }
+
+        .financial-summary p {
+            font-size: 1.1em;
+            margin-bottom: 10px;
+        }
+
+        .financial-summary p strong {
+            color: var(--success-color);
+        }
+         .financial-summary p.needed strong {
+            color: var(--warning-color);
+        }
+
+        .data-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .data-list li {
+            background-color: rgba(40, 40, 60, 0.6);
+            padding: 10px;
+            margin-bottom: 8px;
+            border-radius: 5px;
+            border: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            word-break: break-word; /* Prevent long text overflow */
+        }
+        .data-list li .item-details {
+            flex-grow: 1;
+            margin-right: 10px;
+        }
+
+        .data-list li .item-actions {
+             flex-shrink: 0;
+        }
+
+        .data-list li button {
+            padding: 5px 10px;
+            font-size: 0.9em;
+            margin-left: 5px;
+        }
+
+        .photo-log {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .photo-item {
+            border: 1px solid var(--border-color);
+            border-radius: 5px;
+            overflow: hidden;
+            background-color: rgba(40, 40, 60, 0.6);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .photo-item img {
+            width: 100%;
+            height: 120px; /* Fixed height for grid */
+            object-fit: cover;
+            display: block;
+        }
+        .photo-item .photo-caption {
+            padding: 5px;
+            font-size: 0.8em;
+            color: #b0b0b0;
+            text-align: center;
+            flex-grow: 1;
+        }
+         .photo-item .photo-actions {
+             padding: 5px;
+             text-align: center;
+         }
+         .photo-item .photo-actions button {
+             padding: 3px 8px;
+             font-size: 0.8em;
+         }
+
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 200;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.6);
+            padding-top: 60px;
+        }
+
+        .modal-content {
+            background-color: var(--card-bg);
+            margin: 5% auto;
+            padding: var(--padding);
+            border: 1px solid var(--border-color);
+            width: 90%;
+            max-width: 500px;
+            border-radius: var(--card-border-radius);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .close-button {
+            color: var(--text-color);
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            transition: color 0.3s ease;
+        }
+
+        .close-button:hover,
+        .close-button:focus {
+            color: var(--danger-color);
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        #backup-restore-view .card {
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        #backup-restore-view input[type="file"] {
+            display: block;
+            margin-bottom: var(--gap);
+        }
+
+        .message {
+            padding: 10px;
+            margin-bottom: var(--gap);
+            border-radius: 5px;
+            font-weight: bold;
+        }
+
+        .message.success {
+            background-color: rgba(0, 204, 153, 0.2);
+            color: var(--success-color);
+            border: 1px solid var(--success-color);
+        }
+
+        .message.error {
+            background-color: rgba(255, 102, 102, 0.2);
+            color: var(--danger-color);
+            border: 1px solid var(--danger-color);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: var(--padding);
+            color: #b0b0b0;
+            font-style: italic;
+        }
+
+        /* Responsive Adjustments */
+        @media (max-width: 768px) {
+            header {
+                flex-direction: column;
+                padding: 10px var(--padding);
+            }
+            header h1 {
+                margin-bottom: 10px;
+                font-size: 1.5em;
+            }
+            nav ul {
+                gap: 10px;
+                justify-content: center;
+                flex-wrap: wrap;
+            }
+            body {
+                padding-top: 100px; /* Adjust for stacked header */
+            }
+            .project-list {
+                grid-template-columns: 1fr;
+            }
+             .photo-log {
+                grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            }
+             .photo-item img {
+                 height: 80px;
+             }
+        }
+
+        @media (max-width: 480px) {
+            :root {
+                --padding: 15px;
+                --gap: 15px;
+            }
+             header h1 {
+                 font-size: 1.3em;
+             }
+             nav a {
+                 padding: 3px 8px;
+                 font-size: 0.9em;
+             }
+             .button, button {
+                 padding: 8px 12px;
+                 font-size: 0.9em;
+             }
+             .modal-content {
+                 padding: 15px;
+             }
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <header>
+            <h1>Jariyah Projects Monitor</h1>
+            <nav>
+                <ul>
+                    <li><a href="#" data-view="dashboard-view" class="nav-link active">Dashboard</a></li>
+                    <li><a href="#" data-view="contacts-view" class="nav-link">Contacts</a></li>
+                    <li><a href="#" data-view="backup-restore-view" class="nav-link">Backup/Restore</a></li>
+                </ul>
+            </nav>
+        </header>
+
+        <main id="main-content">
+            <!-- Dashboard View -->
+            <div id="dashboard-view" class="view active">
+                <h2>Community Impact Dashboard</h2>
+                <button id="add-project-button">Add New Project</button>
+                <div id="project-list" class="project-list" style="margin-top: var(--gap);">
+                    <!-- Project items will be loaded here -->
+                </div>
+                <div id="dashboard-empty-state" class="empty-state" style="display: none;">
+                    No projects added yet. Click "Add New Project" to get started!
+                </div>
+            </div>
+
+            <!-- Project Detail View -->
+            <div id="project-detail-view" class="view">
+                <button class="button secondary" id="back-to-dashboard">← Back to Dashboard</button>
+                <div id="project-detail-content" class="card" style="margin-top: var(--gap);">
+                    <h2 id="project-detail-title"></h2>
+                    <p><strong>Goal:</strong> <span id="project-detail-goal"></span></p>
+                    <p><strong>Target Amount:</strong> <span id="project-detail-target"></span></p>
+                    <p><strong>Description:</strong> <span id="project-detail-description"></span></p>
+
+                    <div class="financial-summary">
+                        <h3>Financial Summary</h3>
+                        <p>Total Donations: <strong><span id="financial-total-donations"></span></strong></p>
+                        <p>Total Expenses: <strong><span id="financial-total-expenses"></span></strong></p>
+                        <p class="needed">Remaining Needed: <strong><span id="financial-remaining"></span></strong></p>
+                        <div class="progress-bar-container">
+                            <div class="progress-bar" id="financial-progress-bar"></div>
+                        </div>
+                         <button class="button secondary" id="export-project-summary" style="margin-top: 15px;">Export Summary</button>
+                    </div>
+
+                    <h3>Donations & Pledges <button class="button secondary add-data-button" data-type="donation">Add Donation</button></h3>
+                    <ul id="donations-list" class="data-list">
+                        <!-- Donations will be loaded here -->
+                    </ul>
+                     <div id="donations-empty-state" class="empty-state" style="display: none;">No donations recorded yet.</div>
+
+                    <h3>Expenses <button class="button secondary add-data-button" data-type="expense">Add Expense</button></h3>
+                    <ul id="expenses-list" class="data-list">
+                        <!-- Expenses will be loaded here -->
+                    </ul>
+                     <div id="expenses-empty-state" class="empty-state" style="display: none;">No expenses recorded yet.</div>
+
+                    <h3>Milestones <button class="button secondary add-data-button" data-type="milestone">Add Milestone</button></h3>
+                    <ul id="milestones-list" class="data-list">
+                        <!-- Milestones will be loaded here -->
+                    </ul>
+                     <div id="milestones-empty-state" class="empty-state" style="display: none;">No milestones recorded yet.</div>
+
+                    <h3>Photo Log <button class="button secondary add-data-button" data-type="photo">Add Photo</button></h3>
+                    <div id="photos-log" class="photo-log">
+                        <!-- Photos will be loaded here -->
+                    </div>
+                     <div id="photos-empty-state" class="empty-state" style="display: none;">No photos added yet.</div>
+
+                    <h3>Notes <button class="button secondary add-data-button" data-type="note">Add Note</button></h3>
+                    <ul id="notes-list" class="data-list">
+                        <!-- Notes will be loaded here -->
+                    </ul>
+                     <div id="notes-empty-state" class="empty-state" style="display: none;">No notes added yet.</div>
+
+                </div>
+            </div>
+
+            <!-- Add Project View -->
+            <div id="add-project-view" class="view">
+                 <button class="button secondary" id="back-from-add-project">← Cancel</button>
+                <div class="card" style="margin-top: var(--gap);">
+                    <h2>Add New Project</h2>
+                    <form id="add-project-form">
+                        <div class="form-group">
+                            <label for="project-title">Project Title:</label>
+                            <input type="text" id="project-title" required>
+                        </div>
+                         <div class="form-group">
+                            <label for="project-goal">Project Goal:</label>
+                            <input type="text" id="project-goal" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="project-target">Target Amount:</label>
+                            <input type="number" id="project-target" min="0" step="0.01" value="0" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="project-description">Description:</label>
+                            <textarea id="project-description" required></textarea>
+                        </div>
+                        <button type="submit">Create Project</button>
+                    </form>
+                </div>
+            </div>
+
+             <!-- Contacts View -->
+            <div id="contacts-view" class="view">
+                <h2>Contacts</h2>
+                 <div class="card">
+                    <h3>Add New Contact</h3>
+                    <form id="add-contact-form">
+                        <div class="form-group">
+                            <label for="contact-name">Name:</label>
+                            <input type="text" id="contact-name" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="contact-info">Info (Phone, Email, etc.):</label>
+                            <textarea id="contact-info" required></textarea>
+                        </div>
+                        <button type="submit">Add Contact</button>
+                    </form>
+                 </div>
+
+                 <div class="card" style="margin-top: var(--gap);">
+                     <h3>Contact List</h3>
+                     <ul id="contacts-list" class="data-list">
+                         <!-- Contacts will be loaded here -->
+                     </ul>
+                      <div id="contacts-empty-state" class="empty-state" style="display: none;">No contacts added yet.</div>
+                 </div>
+            </div>
+
+
+            <!-- Backup/Restore View -->
+            <div id="backup-restore-view" class="view">
+                <h2>Backup and Restore</h2>
+                <div class="card">
+                    <h3>Backup Data</h3>
+                    <p>Export all application data to a JSON file.</p>
+                    <button id="backup-button">Download Backup</button>
+                </div>
+                <div class="card" style="margin-top: var(--gap);">
+                    <h3>Restore Data</h3>
+                    <p>Upload a backup JSON file to restore application data. This will replace all existing data.</p>
+                    <input type="file" id="restore-file-input" accept=".json">
+                    <button id="restore-button" disabled>Restore from File</button>
+                    <p class="message error" id="restore-error-message" style="display: none;"></p>
+                </div>
+            </div>
+
+        </main>
+
+        <!-- Modal Container -->
+        <div id="modal-container" class="modal">
+            <div class="modal-content">
+                <span class="close-button">×</span>
+                <h3 id="modal-title">Add Item</h3>
+                <form id="modal-form">
+                    <!-- Form fields will be dynamically added here -->
+                    <input type="hidden" id="modal-project-id">
+                    <input type="hidden" id="modal-data-type">
+                    <button type="submit" id="modal-submit-button">Add</button>
+                </form>
+            </div>
+        </div>
+
+         <!-- Message Container -->
+         <div id="message-container" style="position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); z-index: 300; width: 90%; max-width: 400px;">
+             <!-- Messages will appear here -->
+         </div>
+
+    </div>
+
+    <script>
+        // Author: Yasin Ullah (Pakistani)
+
+        const DB_NAME = 'jariyahProjectsDBz';
+        const DB_VERSION = 1;
+        const OBJECT_STORES = {
+            projects: '++id, title, goal, targetAmount, description, createdAt',
+            donations: '++id, projectId, donorName, amount, date',
+            expenses: '++id, projectId, description, amount, date',
+            milestones: '++id, projectId, description, date',
+            photos: '++id, projectId, caption, date, dataUrl', // dataUrl stores base64 image data
+            notes: '++id, projectId, content, date',
+            contacts: '++id, name, info'
+        };
+
+        let db;
+        let currentProjectId = null;
+
+        // --- IndexedDB Functions ---
+
+        async function openDB() {
+            return new Promise((resolve, reject) => {
+                const request = indexedDB.open(DB_NAME, DB_VERSION);
+
+                request.onupgradeneeded = (event) => {
+                    db = event.target.result;
+                    for (const storeName in OBJECT_STORES) {
+                        if (!db.objectStoreNames.contains(storeName)) {
+                            const store = db.createObjectStore(storeName, { keyPath: 'id', autoIncrement: true });
+                            // Create indexes if defined in OBJECT_STORES value string
+                            const indexes = OBJECT_STORES[storeName].split(',').slice(1).map(idx => idx.trim());
+                            indexes.forEach(index => {
+                                const parts = index.split(' ');
+                                if (parts.length > 0) {
+                                    const indexName = parts[0];
+                                    store.createIndex(indexName, indexName, { unique: false });
+                                }
+                            });
+                        }
+                    }
+                };
+
+                request.onsuccess = (event) => {
+                    db = event.target.result;
+                    console.log('IndexedDB opened successfully');
+                    resolve(db);
+                };
+
+                request.onerror = (event) => {
+                    console.error('IndexedDB error:', event.target.error);
+                    showMessage('Failed to open database.', 'error');
+                    reject(event.target.error);
+                };
+            });
+        }
+
+        async function addData(storeName, data) {
+            return new Promise((resolve, reject) => {
+                const transaction = db.transaction([storeName], 'readwrite');
+                const store = transaction.objectStore(storeName);
+                const request = store.add(data);
+
+                request.onsuccess = (event) => resolve(event.target.result);
+                request.onerror = (event) => {
+                    console.error(`Error adding data to ${storeName}:`, event.target.error);
+                    showMessage(`Failed to add data to ${storeName}.`, 'error');
+                    reject(event.target.error);
+                };
+            });
+        }
+
+        async function getAllData(storeName) {
+            return new Promise((resolve, reject) => {
+                const transaction = db.transaction([storeName], 'readonly');
+                const store = transaction.objectStore(storeName);
+                const request = store.getAll();
+
+                request.onsuccess = (event) => resolve(event.target.result);
+                request.onerror = (event) => {
+                    console.error(`Error getting all data from ${storeName}:`, event.target.error);
+                     showMessage(`Failed to get data from ${storeName}.`, 'error');
+                    reject(event.target.error);
+                };
+            });
+        }
+
+         async function getDataByIndex(storeName, indexName, value) {
+            return new Promise((resolve, reject) => {
+                const transaction = db.transaction([storeName], 'readonly');
+                const store = transaction.objectStore(storeName);
+                const index = store.index(indexName);
+                const request = index.getAll(value);
+
+                request.onsuccess = (event) => resolve(event.target.result);
+                request.onerror = (event) => {
+                    console.error(`Error getting data from ${storeName} by index ${indexName}:`, event.target.error);
+                     showMessage(`Failed to get related data from ${storeName}.`, 'error');
+                    reject(event.target.error);
+                };
+            });
+        }
+
+        async function deleteData(storeName, id) {
+            return new Promise((resolve, reject) => {
+                const transaction = db.transaction([storeName], 'readwrite');
+                const store = transaction.objectStore(storeName);
+                const request = store.delete(id);
+
+                request.onsuccess = () => resolve();
+                request.onerror = (event) => {
+                     console.error(`Error deleting data from ${storeName}:`, event.target.error);
+                     showMessage(`Failed to delete data from ${storeName}.`, 'error');
+                    reject(event.target.error);
+                };
+            });
+        }
+
+        async function clearStore(storeName) {
+             return new Promise((resolve, reject) => {
+                const transaction = db.transaction([storeName], 'readwrite');
+                const store = transaction.objectStore(storeName);
+                const request = store.clear();
+
+                request.onsuccess = () => resolve();
+                request.onerror = (event) => {
+                     console.error(`Error clearing store ${storeName}:`, event.target.error);
+                     showMessage(`Failed to clear store ${storeName}.`, 'error');
+                    reject(event.target.error);
+                };
+            });
+        }
+
+
+        // --- UI Rendering Functions ---
+
+        function showView(viewId) {
+    document.querySelectorAll('.view').forEach(view => {
+        view.classList.remove('active');
+    });
+    const targetView = document.getElementById(viewId);
+    if (targetView) { // Add null check
+        targetView.classList.add('active');
+    } else {
+        console.warn(`Element with ID ${viewId} not found in DOM`);
+    }
+
+    document.querySelectorAll('.nav-link').forEach(link => {
+        link.classList.remove('active');
+    });
+    const targetLink = document.querySelector(`.nav-link[data-view="${viewId}"]`);
+    if (targetLink) { // Add null check for nav-link
+        targetLink.classList.add('active');
+    } else {
+        console.warn(`Nav link with data-view="${viewId}" not found`);
+    }
+
+    // Hide modals when changing view
+    hideModal();
+}
+
+        async function renderDashboard() {
+            const projects = await getAllData('projects');
+            const projectListDiv = document.getElementById('project-list');
+            projectListDiv.innerHTML = ''; // Clear current list
+
+            if (projects.length === 0) {
+                 document.getElementById('dashboard-empty-state').style.display = 'block';
+                 return;
+            } else {
+                 document.getElementById('dashboard-empty-state').style.display = 'none';
+            }
+
+            for (const project of projects) {
+                const donations = await getDataByIndex('donations', 'projectId', project.id);
+                const expenses = await getDataByIndex('expenses', 'projectId', project.id);
+
+                const totalDonations = donations.reduce((sum, d) => sum + d.amount, 0);
+                const totalExpenses = expenses.reduce((sum, e) => sum + e.amount, 0);
+                const remainingNeeded = Math.max(0, project.targetAmount - totalDonations);
+                const progressPercentage = project.targetAmount > 0 ? (totalDonations / project.targetAmount) * 100 : 0;
+                const clampedProgress = Math.min(100, progressPercentage);
+
+                const projectItem = document.createElement('div');
+                projectItem.classList.add('card', 'project-item');
+                projectItem.dataset.projectId = project.id;
+                projectItem.innerHTML = `
+                    <h3>${escapeHTML(project.title)}</h3>
+                    <p>${escapeHTML(project.description.substring(0, 100))}...</p>
+                    <div class="financial-summary" style="border-top: none; padding-top: 0;">
+                         <p style="font-size: 1em;">Collected: <strong>${formatAmount(totalDonations)}</strong></p>
+                         <p style="font-size: 1em;">Target: <strong>${formatAmount(project.targetAmount)}</strong></p>
+                         <p class="needed" style="font-size: 1em;">Needed: <strong>${formatAmount(remainingNeeded)}</strong></p>
+                    </div>
+                    <div class="progress-bar-container">
+                        <div class="progress-bar" style="width: ${clampedProgress}%;"></div>
+                    </div>
+                `;
+                projectListDiv.appendChild(projectItem);
+            }
+        }
+
+        async function renderProjectDetails(projectId) {
+            currentProjectId = projectId;
+            const project = await db.transaction('projects').objectStore('projects').get(projectId);
+
+            if (!project) {
+                showMessage('Project not found.', 'error');
+                showView('dashboard-view');
+                return;
+            }
+
+            document.getElementById('project-detail-title').textContent = escapeHTML(project.title);
+            document.getElementById('project-detail-goal').textContent = escapeHTML(project.goal);
+            document.getElementById('project-detail-target').textContent = formatAmount(project.targetAmount);
+            document.getElementById('project-detail-description').textContent = escapeHTML(project.description);
+
+            await renderFinancialSummary(projectId, project.targetAmount);
+            await renderProjectDataList('donations', projectId, 'donations-list');
+            await renderProjectDataList('expenses', projectId, 'expenses-list');
+            await renderProjectDataList('milestones', projectId, 'milestones-list');
+            await renderProjectPhotos(projectId, 'photos-log');
+            await renderProjectDataList('notes', projectId, 'notes-list');
+
+            showView('project-detail-view');
+        }
+
+        async function renderFinancialSummary(projectId, targetAmount) {
+             const donations = await getDataByIndex('donations', 'projectId', projectId);
+             const expenses = await getDataByIndex('expenses', 'projectId', projectId);
+
+             const totalDonations = donations.reduce((sum, d) => sum + d.amount, 0);
+             const totalExpenses = expenses.reduce((sum, e) => sum + e.amount, 0);
+             const remainingNeeded = Math.max(0, targetAmount - totalDonations);
+             const progressPercentage = targetAmount > 0 ? (totalDonations / targetAmount) * 100 : 0;
+             const clampedProgress = Math.min(100, progressPercentage);
+
+             document.getElementById('financial-total-donations').textContent = formatAmount(totalDonations);
+             document.getElementById('financial-total-expenses').textContent = formatAmount(totalExpenses);
+             document.getElementById('financial-remaining').textContent = formatAmount(remainingNeeded);
+             document.getElementById('financial-progress-bar').style.width = `${clampedProgress}%`;
+        }
+
+
+        async function renderProjectDataList(storeName, projectId, listElementId) {
+            const items = await getDataByIndex(storeName, 'projectId', projectId);
+            const listElement = document.getElementById(listElementId);
+            listElement.innerHTML = ''; // Clear list
+
+            const emptyStateElement = document.getElementById(`${listElementId.replace('-list', '')}-empty-state`);
+
+            if (items.length === 0) {
+                emptyStateElement.style.display = 'block';
+                return;
+            } else {
+                 emptyStateElement.style.display = 'none';
+            }
+
+            items.forEach(item => {
+                const listItem = document.createElement('li');
+                listItem.dataset.id = item.id;
+                listItem.dataset.type = storeName.slice(0, -1); // e.g., 'donation' from 'donations'
+
+                let itemHTML = '';
+                const formattedDate = item.date ? new Date(item.date).toLocaleDateString() : 'N/A';
+
+                switch (storeName) {
+                    case 'donations':
+                        itemHTML = `<div class="item-details"><strong>${escapeHTML(item.donorName || 'Anonymous')}</strong>: ${formatAmount(item.amount)} on ${formattedDate}</div>`;
+                        break;
+                    case 'expenses':
+                        itemHTML = `<div class="item-details"><strong>Expense:</strong> ${escapeHTML(item.description)} - ${formatAmount(item.amount)} on ${formattedDate}</div>`;
+                        break;
+                    case 'milestones':
+                        itemHTML = `<div class="item-details"><strong>Milestone:</strong> ${escapeHTML(item.description)} on ${formattedDate}</div>`;
+                        break;
+                    case 'notes':
+                        itemHTML = `<div class="item-details"><strong>Note:</strong> ${escapeHTML(item.content)} on ${formattedDate}</div>`;
+                        break;
+                }
+
+                listItem.innerHTML = itemHTML + `<div class="item-actions"><button class="button danger delete-item">Delete</button></div>`;
+                listElement.appendChild(listItem);
+            });
+        }
+
+        async function renderProjectPhotos(projectId, containerElementId) {
+             const photos = await getDataByIndex('photos', 'projectId', projectId);
+             const containerElement = document.getElementById(containerElementId);
+             containerElement.innerHTML = ''; // Clear container
+
+             const emptyStateElement = document.getElementById('photos-empty-state');
+
+             if (photos.length === 0) {
+                 emptyStateElement.style.display = 'block';
+                 return;
+             } else {
+                 emptyStateElement.style.display = 'none';
+             }
+
+             photos.forEach(photo => {
+                 const photoItem = document.createElement('div');
+                 photoItem.classList.add('photo-item');
+                 photoItem.dataset.id = photo.id;
+
+                 photoItem.innerHTML = `
+                     <img src="${escapeHTML(photo.dataUrl)}" alt="${escapeHTML(photo.caption || 'Project photo')}">
+                     <div class="photo-caption">${escapeHTML(photo.caption || 'No caption')}</div>
+                     <div class="photo-actions">
+                         <button class="button danger delete-item" data-type="photo">Delete</button>
+                     </div>
+                 `;
+                 containerElement.appendChild(photoItem);
+             });
+        }
+
+        async function renderContactsList() {
+            const contacts = await getAllData('contacts');
+            const listElement = document.getElementById('contacts-list');
+            listElement.innerHTML = ''; // Clear list
+
+            const emptyStateElement = document.getElementById('contacts-empty-state');
+
+            if (contacts.length === 0) {
+                 emptyStateElement.style.display = 'block';
+                 return;
+            } else {
+                 emptyStateElement.style.display = 'none';
+            }
+
+            contacts.forEach(contact => {
+                const listItem = document.createElement('li');
+                listItem.dataset.id = contact.id;
+                listItem.dataset.type = 'contact';
+
+                listItem.innerHTML = `
+                    <div class="item-details">
+                        <strong>${escapeHTML(contact.name)}</strong><br>
+                        ${escapeHTML(contact.info).replace(/\n/g, '<br>')}
+                    </div>
+                    <div class="item-actions">
+                        <button class="button danger delete-item">Delete</button>
+                    </div>
+                `;
+                listElement.appendChild(listItem);
+            });
+        }
+
+
+        // --- Modal Handling ---
+
+        const modal = document.getElementById('modal-container');
+        const modalTitle = document.getElementById('modal-title');
+        const modalForm = document.getElementById('modal-form');
+        const modalSubmitButton = document.getElementById('modal-submit-button');
+        const modalProjectIdInput = document.getElementById('modal-project-id');
+        const modalDataTypeInput = document.getElementById('modal-data-type');
+        const closeButton = document.querySelector('.close-button');
+
+        function showModal(type, projectId) {
+            modalProjectIdInput.value = projectId;
+            modalDataTypeInput.value = type;
+            modalForm.innerHTML = ''; // Clear previous form fields
+
+            let formHTML = '';
+            modalSubmitButton.textContent = `Add ${type.charAt(0).toUpperCase() + type.slice(1)}`;
+
+            switch (type) {
+                case 'donation':
+                    modalTitle.textContent = 'Add New Donation/Pledge';
+                    formHTML = `
+                        <div class="form-group"><label for="donor-name">Donor Name (Optional):</label><input type="text" id="donor-name"></div>
+                        <div class="form-group"><label for="donation-amount">Amount:</label><input type="number" id="donation-amount" min="0" step="0.01" required></div>
+                        <div class="form-group"><label for="donation-date">Date:</label><input type="date" id="donation-date" value="${new Date().toISOString().split('T')[0]}" required></div>
+                    `;
+                    break;
+                case 'expense':
+                    modalTitle.textContent = 'Add New Expense';
+                     formHTML = `
+                        <div class="form-group"><label for="expense-description">Description:</label><textarea id="expense-description" required></textarea></div>
+                        <div class="form-group"><label for="expense-amount">Amount:</label><input type="number" id="expense-amount" min="0" step="0.01" required></div>
+                        <div class="form-group"><label for="expense-date">Date:</label><input type="date" id="expense-date" value="${new Date().toISOString().split('T')[0]}" required></div>
+                    `;
+                    break;
+                case 'milestone':
+                    modalTitle.textContent = 'Add New Milestone';
+                     formHTML = `
+                        <div class="form-group"><label for="milestone-description">Description:</label><textarea id="milestone-description" required></textarea></div>
+                        <div class="form-group"><label for="milestone-date">Date:</label><input type="date" id="milestone-date" value="${new Date().toISOString().split('T')[0]}" required></div>
+                    `;
+                    break;
+                case 'photo':
+                    modalTitle.textContent = 'Add New Photo';
+                     formHTML = `
+                        <div class="form-group"><label for="photo-file">Select Photo:</label><input type="file" id="photo-file" accept="image/*" required></div>
+                        <div class="form-group"><label for="photo-caption">Caption (Optional):</label><input type="text" id="photo-caption"></div>
+                    `;
+                    break;
+                 case 'note':
+                    modalTitle.textContent = 'Add New Note';
+                     formHTML = `
+                        <div class="form-group"><label for="note-content">Note:</label><textarea id="note-content" required></textarea></div>
+                    `;
+                    break;
+            }
+
+            modalForm.innerHTML = formHTML + `
+                 <input type="hidden" id="modal-project-id" value="${projectId}">
+                 <input type="hidden" id="modal-data-type" value="${type}">
+                 <button type="submit" id="modal-submit-button">${modalSubmitButton.textContent}</button>
+            `;
+
+            modal.style.display = 'block';
+        }
+
+        function hideModal() {
+            modal.style.display = 'none';
+        }
+
+        closeButton.onclick = hideModal;
+        window.onclick = (event) => {
+            if (event.target === modal) {
+                hideModal();
+            }
+        };
+
+        modalForm.onsubmit = async (event) => {
+            event.preventDefault();
+            const projectId = parseInt(document.getElementById('modal-project-id').value);
+            const dataType = document.getElementById('modal-data-type').value;
+            let data = { projectId: projectId };
+
+            try {
+                switch (dataType) {
+                    case 'donation':
+                        const donorName = document.getElementById('donor-name').value;
+                        const donationAmount = parseFloat(document.getElementById('donation-amount').value);
+                        const donationDate = new Date(document.getElementById('donation-date').value).getTime();
+                        if (isNaN(donationAmount) || donationAmount < 0) throw new Error('Invalid amount');
+                        data = { projectId, donorName, amount: donationAmount, date: donationDate };
+                        await addData('donations', data);
+                        await renderProjectDataList('donations', projectId, 'donations-list');
+                        await renderFinancialSummary(projectId, (await db.transaction('projects').objectStore('projects').get(projectId)).targetAmount);
+                        showMessage('Donation added successfully!', 'success');
+                        break;
+                    case 'expense':
+                        const expenseDescription = document.getElementById('expense-description').value;
+                        const expenseAmount = parseFloat(document.getElementById('expense-amount').value);
+                        const expenseDate = new Date(document.getElementById('expense-date').value).getTime();
+                        if (isNaN(expenseAmount) || expenseAmount < 0) throw new Error('Invalid amount');
+                        data = { projectId, description: expenseDescription, amount: expenseAmount, date: expenseDate };
+                        await addData('expenses', data);
+                        await renderProjectDataList('expenses', projectId, 'expenses-list');
+                         await renderFinancialSummary(projectId, (await db.transaction('projects').objectStore('projects').get(projectId)).targetAmount);
+                         showMessage('Expense added successfully!', 'success');
+                        break;
+                    case 'milestone':
+                        const milestoneDescription = document.getElementById('milestone-description').value;
+                        const milestoneDate = new Date(document.getElementById('milestone-date').value).getTime();
+                        data = { projectId, description: milestoneDescription, date: milestoneDate };
+                        await addData('milestones', data);
+                        await renderProjectDataList('milestones', projectId, 'milestones-list');
+                         showMessage('Milestone added successfully!', 'success');
+                        break;
+                    case 'photo':
+                        const photoFile = document.getElementById('photo-file').files[0];
+                        const photoCaption = document.getElementById('photo-caption').value;
+                        if (!photoFile) throw new Error('No file selected');
+
+                        const reader = new FileReader();
+                        reader.onloadend = async () => {
+                            const dataUrl = reader.result;
+                            data = { projectId, caption: photoCaption, date: Date.now(), dataUrl: dataUrl };
+                            await addData('photos', data);
+                            await renderProjectPhotos(projectId, 'photos-log');
+                             showMessage('Photo added successfully!', 'success');
+                             hideModal(); // Hide modal after async file read and add
+                        };
+                        reader.onerror = (err) => {
+                            console.error('File read error:', err);
+                            showMessage('Failed to read photo file.', 'error');
+                            hideModal();
+                        };
+                        reader.readAsDataURL(photoFile);
+                        // Do not hide modal immediately for photo upload
+                        return; // Exit to prevent hideModal below
+                    case 'note':
+                         const noteContent = document.getElementById('note-content').value;
+                         data = { projectId, content: noteContent, date: Date.now() };
+                         await addData('notes', data);
+                         await renderProjectDataList('notes', projectId, 'notes-list');
+                          showMessage('Note added successfully!', 'success');
+                         break;
+                }
+                hideModal();
+            } catch (error) {
+                console.error('Error adding data:', error);
+                showMessage(`Failed to add ${dataType}: ${error.message}`, 'error');
+            }
+        };
+
+
+        // --- Event Listeners ---
+
+        document.getElementById('add-project-button').addEventListener('click', () => {
+            showView('add-project-view');
+        });
+
+        document.getElementById('back-to-dashboard').addEventListener('click', () => {
+            currentProjectId = null;
+            renderDashboard(); // Re-render dashboard to show updated progress
+            showView('dashboard-view');
+        });
+
+         document.getElementById('back-from-add-project').addEventListener('click', () => {
+             document.getElementById('add-project-form').reset();
+             showView('dashboard-view');
+         });
+
+
+        document.getElementById('add-project-form').addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const title = document.getElementById('project-title').value;
+            const goal = document.getElementById('project-goal').value;
+            const targetAmount = parseFloat(document.getElementById('project-target').value);
+            const description = document.getElementById('project-description').value;
+
+            if (isNaN(targetAmount) || targetAmount < 0) {
+                 showMessage('Please enter a valid target amount.', 'warning');
+                 return;
+            }
+
+            const project = {
+                title,
+                goal,
+                targetAmount,
+                description,
+                createdAt: Date.now()
+            };
+
+            try {
+                await addData('projects', project);
+                document.getElementById('add-project-form').reset();
+                showMessage('Project created successfully!', 'success');
+                renderDashboard(); // Refresh dashboard
+                showView('dashboard-view');
+            } catch (error) {
+                console.error('Error creating project:', error);
+                 showMessage('Failed to create project.', 'error');
+            }
+        });
+
+         document.getElementById('add-contact-form').addEventListener('submit', async (event) => {
+             event.preventDefault();
+             const name = document.getElementById('contact-name').value;
+             const info = document.getElementById('contact-info').value;
+
+             const contact = { name, info };
+
+             try {
+                 await addData('contacts', contact);
+                 document.getElementById('add-contact-form').reset();
+                 showMessage('Contact added successfully!', 'success');
+                 renderContactsList(); // Refresh contacts list
+             } catch (error) {
+                 console.error('Error adding contact:', error);
+                 showMessage('Failed to add contact.', 'error');
+             }
+         });
+
+
+        document.getElementById('project-list').addEventListener('click', (event) => {
+            const projectItem = event.target.closest('.project-item');
+            if (projectItem) {
+                const projectId = parseInt(projectItem.dataset.projectId);
+                renderProjectDetails(projectId);
+            }
+        });
+
+        document.getElementById('project-detail-content').addEventListener('click', async (event) => {
+            const addButton = event.target.closest('.add-data-button');
+            if (addButton && currentProjectId !== null) {
+                const dataType = addButton.dataset.type;
+                showModal(dataType, currentProjectId);
+            }
+
+            const deleteButton = event.target.closest('.delete-item');
+            if (deleteButton) {
+                const itemElement = deleteButton.closest('li') || deleteButton.closest('.photo-item');
+                const itemId = parseInt(itemElement.dataset.id);
+                const itemType = itemElement.dataset.type; // 'donation', 'expense', 'milestone', 'photo', 'note', 'contact'
+
+                if (confirm(`Are you sure you want to delete this ${itemType}?`)) {
+                    try {
+                        await deleteData(`${itemType}s`, itemId); // Use plural store name
+                        showMessage(`${itemType.charAt(0).toUpperCase() + itemType.slice(1)} deleted successfully!`, 'success');
+
+                        // Re-render the relevant list/section
+                        if (itemType === 'contact') {
+                             renderContactsList();
+                        } else if (currentProjectId !== null) {
+                            if (itemType === 'photo') {
+                                await renderProjectPhotos(currentProjectId, 'photos-log');
+                            } else {
+                                await renderProjectDataList(`${itemType}s`, currentProjectId, `${itemType}s-list`);
+                            }
+                             // Update financial summary if donation or expense was deleted
+                            if (itemType === 'donation' || itemType === 'expense') {
+                                const project = await db.transaction('projects').objectStore('projects').get(currentProjectId);
+                                await renderFinancialSummary(currentProjectId, project.targetAmount);
+                            }
+                        }
+
+                    } catch (error) {
+                        console.error(`Error deleting ${itemType}:`, error);
+                        showMessage(`Failed to delete ${itemType}.`, 'error');
+                    }
+                }
+            }
+        });
+
+        document.getElementById('contacts-list').addEventListener('click', async (event) => {
+             const deleteButton = event.target.closest('.delete-item');
+             if (deleteButton) {
+                 const itemElement = deleteButton.closest('li');
+                 const itemId = parseInt(itemElement.dataset.id);
+                 const itemType = itemElement.dataset.type; // 'contact'
+
+                 if (confirm(`Are you sure you want to delete this ${itemType}?`)) {
+                     try {
+                         await deleteData(`${itemType}s`, itemId); // Use plural store name
+                         showMessage(`${itemType.charAt(0).toUpperCase() + itemType.slice(1)} deleted successfully!`, 'success');
+                         renderContactsList(); // Re-render contacts list
+                     } catch (error) {
+                         console.error(`Error deleting ${itemType}:`, error);
+                         showMessage(`Failed to delete ${itemType}.`, 'error');
+                     }
+                 }
+             }
+        });
+
+
+        document.getElementById('export-project-summary').addEventListener('click', async () => {
+            if (currentProjectId === null) return;
+
+            try {
+                const project = await db.transaction('projects').objectStore('projects').get(currentProjectId);
+                const donations = await getDataByIndex('donations', 'projectId', currentProjectId);
+                const expenses = await getDataByIndex('expenses', 'projectId', currentProjectId);
+                const milestones = await getDataByIndex('milestones', 'projectId', currentProjectId);
+                const photos = await getDataByIndex('photos', 'projectId', currentProjectId);
+                const notes = await getDataByIndex('notes', 'projectId', currentProjectId);
+
+                const totalDonations = donations.reduce((sum, d) => sum + d.amount, 0);
+                const totalExpenses = expenses.reduce((sum, e) => sum + e.amount, 0);
+                const remainingNeeded = Math.max(0, project.targetAmount - totalDonations);
+
+                let summaryText = `Project Summary: ${project.title}\n\n`;
+                summaryText += `Goal: ${project.goal}\n`;
+                summaryText += `Description:\n${project.description}\n\n`;
+                summaryText += `--- Financial Summary ---\n`;
+                summaryText += `Target Amount: ${formatAmount(project.targetAmount)}\n`;
+                summaryText += `Total Donations: ${formatAmount(totalDonations)}\n`;
+                summaryText += `Total Expenses: ${formatAmount(totalExpenses)}\n`;
+                summaryText += `Remaining Needed: ${formatAmount(remainingNeeded)}\n\n`;
+
+                summaryText += `--- Donations & Pledges ---\n`;
+                if (donations.length === 0) {
+                    summaryText += "No donations recorded.\n";
+                } else {
+                    donations.forEach(d => {
+                        summaryText += `- ${d.donorName || 'Anonymous'}: ${formatAmount(d.amount)} on ${new Date(d.date).toLocaleDateString()}\n`;
+                    });
+                }
+                summaryText += "\n";
+
+                summaryText += `--- Expenses ---\n`;
+                 if (expenses.length === 0) {
+                    summaryText += "No expenses recorded.\n";
+                } else {
+                    expenses.forEach(e => {
+                        summaryText += `- ${e.description}: ${formatAmount(e.amount)} on ${new Date(e.date).toLocaleDateString()}\n`;
+                    });
+                }
+                summaryText += "\n";
+
+                summaryText += `--- Milestones ---\n`;
+                 if (milestones.length === 0) {
+                    summaryText += "No milestones recorded.\n";
+                } else {
+                    milestones.forEach(m => {
+                        summaryText += `- ${m.description} on ${new Date(m.date).toLocaleDateString()}\n`;
+                    });
+                }
+                summaryText += "\n";
+
+                 summaryText += `--- Photo Log ---\n`;
+                 if (photos.length === 0) {
+                    summaryText += "No photos added.\n";
+                } else {
+                    photos.forEach((p, index) => {
+                        summaryText += `- Photo ${index + 1} (${new Date(p.date).toLocaleDateString()}): ${p.caption || 'No caption'}\n`;
+                    });
+                 }
+                 summaryText += "\n";
+
+                 summaryText += `--- Notes ---\n`;
+                 if (notes.length === 0) {
+                    summaryText += "No notes added.\n";
+                } else {
+                    notes.forEach(n => {
+                        summaryText += `- ${new Date(n.date).toLocaleDateString()}:\n  ${n.content}\n`;
+                    });
+                 }
+                 summaryText += "\n";
+
+
+                const blob = new Blob([summaryText], { type: 'text/plain' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `${project.title.replace(/[^a-z0-9]/gi, '_')}_summary.txt`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                 showMessage('Project summary exported.', 'success');
+
+            } catch (error) {
+                console.error('Error exporting summary:', error);
+                showMessage('Failed to export project summary.', 'error');
+            }
+        });
+
+        // --- Backup/Restore ---
+
+        document.getElementById('backup-button').addEventListener('click', async () => {
+            try {
+                const backupData = {};
+                for (const storeName in OBJECT_STORES) {
+                    backupData[storeName] = await getAllData(storeName);
+                }
+
+                const jsonString = JSON.stringify(backupData, null, 2);
+                const blob = new Blob([jsonString], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `jariyah_projects_backup_${new Date().toISOString().split('T')[0]}.json`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                showMessage('Backup downloaded successfully!', 'success');
+
+            } catch (error) {
+                console.error('Backup failed:', error);
+                showMessage('Backup failed. See console for details.', 'error');
+            }
+        });
+
+        const restoreFileInput = document.getElementById('restore-file-input');
+        const restoreButton = document.getElementById('restore-button');
+        const restoreErrorMessage = document.getElementById('restore-error-message');
+
+        restoreFileInput.addEventListener('change', () => {
+            if (restoreFileInput.files.length > 0) {
+                restoreButton.disabled = false;
+                 restoreErrorMessage.style.display = 'none';
+            } else {
+                restoreButton.disabled = true;
+                 restoreErrorMessage.style.display = 'none';
+            }
+        });
+
+        restoreButton.addEventListener('click', async () => {
+            const file = restoreFileInput.files[0];
+            if (!file) {
+                 showMessage('Please select a backup file.', 'warning');
+                 return;
+            }
+
+            if (!confirm('WARNING: Restoring will erase ALL current data and replace it with the backup data. Are you sure?')) {
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = async (event) => {
+                try {
+                    const backupData = JSON.parse(event.target.result);
+
+                    // Basic validation of backup structure
+                    for (const storeName in OBJECT_STORES) {
+                        if (!Array.isArray(backupData[storeName])) {
+                            throw new Error(`Invalid backup file structure: Missing or invalid data for store "${storeName}".`);
+                        }
+                    }
+
+                    // Clear all existing data
+                    for (const storeName in OBJECT_STORES) {
+                        await clearStore(storeName);
+                    }
+
+                    // Add data from backup
+                    for (const storeName in OBJECT_STORES) {
+                         const storeData = backupData[storeName];
+                         const transaction = db.transaction([storeName], 'readwrite');
+                         const store = transaction.objectStore(storeName);
+
+                         // Use put instead of add to preserve original IDs if possible
+                         // However, IndexedDB auto-increment keys are separate.
+                         // For simplicity and robustness against ID conflicts, let's re-add without specifying ID.
+                         // This means IDs will change on restore. This is usually acceptable for offline apps.
+                         // If preserving IDs was critical, we'd need manual key management.
+                         for (const item of storeData) {
+                             // Remove the old ID before adding
+                             const newItem = { ...item };
+                             delete newItem.id; // Let IndexedDB assign a new ID
+                             await new Promise((resolve, reject) => {
+                                 const request = store.add(newItem);
+                                 request.onsuccess = () => resolve();
+                                 request.onerror = (e) => {
+                                      console.error(`Error adding item during restore to ${storeName}:`, e.target.error);
+                                      reject(e.target.error);
+                                 };
+                             });
+                         }
+                    }
+
+                    showMessage('Restore successful! Data has been loaded.', 'success');
+                    restoreFileInput.value = ''; // Clear file input
+                    restoreButton.disabled = true;
+                    renderDashboard(); // Go back to dashboard and show new data
+                    showView('dashboard-view');
+
+                } catch (error) {
+                    console.error('Restore failed:', error);
+                    restoreErrorMessage.textContent = `Restore failed: ${error.message}`;
+                    restoreErrorMessage.style.display = 'block';
+                    showMessage('Restore failed. See message above.', 'error');
+                }
+            };
+            reader.onerror = (event) => {
+                 console.error('File read error during restore:', event.target.error);
+                 restoreErrorMessage.textContent = `Failed to read file: ${event.target.error}`;
+                 restoreErrorMessage.style.display = 'block';
+                 showMessage('Failed to read backup file.', 'error');
+            };
+            reader.readAsText(file);
+        });
+
+
+        // --- Utility Functions ---
+
+        function formatAmount(amount) {
+    if (amount == null || isNaN(amount)) {
+        return '₨0.00'; // Fallback value in PKR
+    }
+    return amount.toLocaleString('en-PK', { style: 'currency', currency: 'PKR' });
+}
+
+        function escapeHTML(str) {
+             if (typeof str !== 'string') return str;
+             const div = document.createElement('div');
+             div.appendChild(document.createTextNode(str));
+             return div.innerHTML;
+        }
+
+        function showMessage(message, type = 'info', duration = 5000) {
+            const container = document.getElementById('message-container');
+            const messageElement = document.createElement('div');
+            messageElement.classList.add('message', type);
+            messageElement.textContent = message;
+            container.appendChild(messageElement);
+
+            // Auto-remove message
+            setTimeout(() => {
+                messageElement.remove();
+            }, duration);
+        }
+
+
+        // --- Sample Data Initialization ---
+
+        async function addSampleData() {
+            const projects = await getAllData('projects');
+            if (projects.length > 0) {
+                console.log('Sample data already exists.');
+                return; // Don't add samples if data exists
+            }
+
+            console.log('Adding sample data...');
+
+            const project1 = await addData('projects', {
+                title: 'Village Well Construction',
+                goal: 'Provide clean water to Al-Kareem Village',
+                targetAmount: 5000.00,
+                description: 'Construct a deep water well with a pump and distribution point in Al-Kareem Village, which currently lacks reliable access to clean water.',
+                createdAt: Date.now() - 30 * 24 * 60 * 60 * 1000 // 30 days ago
+            });
+
+            const project2 = await addData('projects', {
+                title: 'Orphan Sponsorship Program',
+                goal: 'Sponsor 10 orphans for one year',
+                targetAmount: 12000.00,
+                description: 'Provide food, shelter, education, and healthcare for 10 orphaned children for a full year through local orphanages.',
+                createdAt: Date.now() - 60 * 24 * 60 * 60 * 1000 // 60 days ago
+            });
+
+            const project3 = await addData('projects', {
+                title: 'Community Tree Planting Drive',
+                goal: 'Plant 1000 trees in urban areas',
+                targetAmount: 1500.00,
+                description: 'Organize a community-wide effort to plant 1000 saplings in parks, streets, and public spaces to improve air quality and green cover.',
+                createdAt: Date.now() - 15 * 24 * 60 * 60 * 1000 // 15 days ago
+            });
+
+             const project4 = await addData('projects', {
+                title: 'Small Community Center Building',
+                goal: 'Build a multi-purpose community center',
+                targetAmount: 25000.00,
+                description: 'Construct a small building to serve as a hub for community activities, classes, and gatherings.',
+                createdAt: Date.now() - 90 * 24 * 60 * 60 * 1000 // 90 days ago
+            });
+
+
+            // Add sample data for Project 1 (Well)
+            await addData('donations', { projectId: project1, donorName: 'Sister Fatima', amount: 500.00, date: Date.now() - 28 * 24 * 60 * 60 * 1000 });
+            await addData('donations', { projectId: project1, donorName: 'Brother Ahmed', amount: 1000.00, date: Date.now() - 25 * 24 * 60 * 60 * 1000 });
+            await addData('donations', { projectId: project1, donorName: 'Anonymous', amount: 250.00, date: Date.now() - 20 * 24 * 60 * 60 * 1000 });
+             await addData('donations', { projectId: project1, donorName: 'Local Business', amount: 750.00, date: Date.now() - 10 * 24 * 60 * 60 * 1000 });
+            await addData('expenses', { projectId: project1, description: 'Site Survey', amount: 150.00, date: Date.now() - 27 * 24 * 60 * 60 * 1000 });
+            await addData('expenses', { projectId: project1, description: 'Drilling Equipment Rental Deposit', amount: 500.00, date: Date.now() - 18 * 24 * 60 * 60 * 1000 });
+            await addData('milestones', { projectId: project1, description: 'Site identified and approved', date: Date.now() - 29 * 24 * 60 * 60 * 1000 });
+             await addData('milestones', { projectId: project1, description: 'Drilling commenced', date: Date.now() - 17 * 24 * 60 * 60 * 1000 });
+             await addData('notes', { projectId: project1, content: 'Initial community meeting was very positive. Villagers are eager.', date: Date.now() - 29 * 24 * 60 * 60 * 1000 });
+
+
+             // Add sample data for Project 2 (Orphans)
+             await addData('donations', { projectId: project2, donorName: 'Family Al-Hassan', amount: 2400.00, date: Date.now() - 55 * 24 * 60 * 60 * 1000 });
+             await addData('donations', { projectId: project2, donorName: 'Community Fund', amount: 5000.00, date: Date.now() - 40 * 24 * 60 * 60 * 1000 });
+              await addData('donations', { projectId: project2, donorName: 'Sister Aisha', amount: 1200.00, date: Date.now() - 35 * 24 * 60 * 60 * 1000 });
+             await addData('expenses', { projectId: project2, description: 'First quarter support payment to Orphanage A (5 orphans)', amount: 3000.00, date: Date.now() - 38 * 24 * 60 * 60 * 1000 });
+             await addData('milestones', { projectId: project2, description: 'Partnership confirmed with Orphanage A and B', date: Date.now() - 58 * 24 * 60 * 60 * 1000 });
+             await addData('milestones', { projectId: project2, description: 'Support payments initiated for 10 orphans', date: Date.now() - 37 * 24 * 60 * 60 * 1000 });
+             await addData('notes', { projectId: project2, content: 'Received thank you letters from the orphanages. Children are doing well.', date: Date.now() - 30 * 24 * 60 * 60 * 1000 });
+
+
+             // Add sample data for Project 3 (Trees)
+             await addData('donations', { projectId: project3, donorName: 'Local Mosque', amount: 300.00, date: Date.now() - 14 * 24 * 60 * 60 * 1000 });
+             await addData('donations', { projectId: project3, donorName: 'Eco Club', amount: 200.00, date: Date.now() - 12 * 24 * 60 * 60 * 1000 });
+             await addData('expenses', { projectId: project3, description: 'Purchase of 500 saplings', amount: 750.00, date: Date.now() - 11 * 24 * 60 * 60 * 1000 });
+             await addData('milestones', { projectId: project3, description: 'First batch of 500 trees planted', date: Date.now() - 9 * 24 * 60 * 60 * 1000 });
+
+
+             // Add sample data for Project 4 (Community Center)
+             await addData('donations', { projectId: project4, donorName: 'Major Donor', amount: 10000.00, date: Date.now() - 80 * 24 * 60 * 60 * 1000 });
+             await addData('donations', { projectId: project4, donorName: 'Fundraising Event', amount: 8000.00, date: Date.now() - 70 * 24 * 60 * 60 * 1000 });
+             await addData('expenses', { projectId: project4, description: 'Land purchase', amount: 15000.00, date: Date.now() - 75 * 24 * 60 * 60 * 1000 });
+             await addData('milestones', { projectId: project4, description: 'Land acquired', date: Date.now() - 74 * 24 * 60 * 60 * 1000 });
+             await addData('notes', { projectId: project4, content: 'Planning permission application submitted.', date: Date.now() - 65 * 24 * 60 * 60 * 1000 });
+
+
+             // Add sample contacts
+             await addData('contacts', { name: 'Imam Abdullah', info: 'Local Mosque Contact\nPhone: 03xx-xxxxxxx' });
+             await addData('contacts', { name: 'Orphanage A Manager', info: 'Sister Khadija\nEmail: orphanageA@example.com' });
+             await addData('contacts', { name: 'Tree Nursery Supplier', info: 'Green Thumb Nurseries\nPhone: 03xx-yyyyyyy' });
+             await addData('contacts', { name: 'Project Volunteer Coordinator', info: 'Brother Sami\nPhone: 03xx-zzzzzzz' });
+
+
+            console.log('Sample data added.');
+        }
+
+
+        // --- App Initialization ---
+
+        async function initApp() {
+            try {
+                await openDB();
+                await addSampleData(); // Add sample data if DB is empty
+                renderDashboard(); // Start on the dashboard view
+                // Add event listeners for navigation links
+                document.querySelectorAll('.nav-link').forEach(link => {
+                    link.addEventListener('click', (event) => {
+                        event.preventDefault();
+                        const viewId = event.target.dataset.view;
+                        showView(viewId);
+                        // Render view content when navigating
+                        if (viewId === 'dashboard-view') {
+                            renderDashboard();
+                        } else if (viewId === 'contacts-view') {
+                            renderContactsList();
+                        }
+                        // Other views like project-detail are rendered via clicks on dashboard items
+                    });
+                });
+
+            } catch (error) {
+                console.error('App initialization failed:', error);
+                 showMessage('App failed to start. Database error.', 'error');
+            }
+        }
+
+        // Start the application
+        initApp();
+
+    </script>
+</body>
+</html>
